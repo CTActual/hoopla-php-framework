@@ -1,4 +1,4 @@
-===============================
+
 Hoopla Framework Installation Instructions
 ===============================
 
@@ -13,8 +13,7 @@ The following steps serve as an outline (details to follow):
 7.  Make sure your application pages can connect with the Hoopla database.
 
 
-===============================
-		System Requirements
+System Requirements
 ===============================
 
 Any local server that can handle PHP 5.6+ and MySQL 5.3+ should be able to install the IDE and database.
@@ -24,8 +23,8 @@ Please read the detail installation instructions for caveats.
 Future updates might require a change in the hosting environment.
 
 
-===============================
-		Detailed Installation Instructions
+
+Detailed Installation Instructions
 ===============================
 
 1. Set up a local PHP and MySQL web (HTTP) server for installing the framework IDE and developing the web application.
