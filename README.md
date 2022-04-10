@@ -6,4 +6,4 @@ This is the **Hoopla Framework** UI website.
 
 Use the **Hoopla Framework** to create your websites.
 
-It relies on some 3^rd party HTML, JS and CSS.  See copyright and license information within each file.
+It relies on some 3rd party HTML, JS and CSS.  See copyright and license information within each file.
