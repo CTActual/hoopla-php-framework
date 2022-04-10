@@ -664,7 +664,7 @@ function hfw_del_pattern($query=null, $i=null, $input=null)
 	}
 
 //_______________________________________________________________________________________
-function transpose_output($input=array() )
+function hfw_transpose_output($input=array() )
 {
 	$o = array();
 
