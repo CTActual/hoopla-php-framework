@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2021 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -280,11 +280,27 @@ function check_calendar_dates($year, $mon, $day=32)
 	}
 
 //_________________________________________________________________________________________________________
-function check_this_date($datepassed)
+function check_this_date($datepassed=null)
 {
 	$datepassed = str_replace('T', ' ', $datepassed);
 
 	 return preg_match("/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/i", $datepassed);
+	}
+
+//_________________________________________________________________________________________________________
+function check_this_time($clocktime=null)
+{
+	// Drop in replacement using filter_var instead of preg_match
+	// Returns false if clock time does not match pattern (12:34:56)
+	// No am/pm
+	 return filter_var($clocktime, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/^([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$/') ) );
+	}
+
+//_________________________________________________________________________________________________________
+function check_this_mil_time($miltime=null)
+{
+	// Returns false if military time does not match pattern (1234)
+	 return filter_var($miltime, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/^([0-1][0-9]|[2][0-3])([0-5][0-9])$/') ) );
 	}
 
 //_________________________________________________________________________________________________________
@@ -307,10 +323,36 @@ function gen_flat_number_array($begin=1, $end=100, $len=2, $interval=1, $str='__
 	}
 
 //_________________________________________________________________________________________________________
-
+function mil_to_clock_time($miltime=null)
+{
+	// Converts military time (1234) to clock time (12:34:56)
+	if (empty($miltime) ) {$miltime = "0000";}
+	
+	$hr = substr($miltime, 0, 2);
+	$mi = substr($miltime, 2, 2);
+	
+	// We'll assume that a short string is hours from 00 to 23
+	$hr = str_pad($hr, 2, "0", STR_PAD_LEFT);
+	
+	// We'll assume that a short remainder string is less than 10 minutes
+	$mi = str_pad($mi, 2, "0", STR_PAD_LEFT);
+	
+	if (!is_numeric($hr) ) {$hr = "00";}
+	if (!is_numeric($mi) ) {$mi = "00";}
+	
+	if ($hr > 23) {$hr = "23";}
+	if ($mi > 59) {$mi = "59";}
+	
+	return "{$hr}:{$mi}:00";
+	}
+		
+//_________________________________________________________________________________________________________
 $gds = 'gen_date_selector';
 $ccd = 'check_calendar_dates';
 $gfna = 'gen_flat_number_array';
 $ctd = 'check_this_date';
+$ctt = 'check_this_time';
+$ctmt = 'check_this_mil_time';
+$mtct = 'mil_to_clock_time';
 
 ?>

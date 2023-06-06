@@ -50,14 +50,16 @@ function menu_maker($list_array=null, $newpg=1)
 	return $aoo('ul', "core={$aoa('li', $menu)}");
 	}
 
-//___________________________________________________________________________________________
+//"___________________________________________________________________________________________
 
 function row_color($i=0, $even="#FFF", $odd="#CFC")
 {
+	$s = "background-color:";
+	
 	if ( ($i % 2) == 0) 
-		{return "background-color:$even;";}
+		{return (empty($even) ) ? "{$s}#FFF;" : "{$s}$even;";}
 	else
-		{return "background-color:$odd;";}
+		{return (empty($odd) ) ? "{$s}#CFC;" : "{$s}$odd;";}
 	}
 
 //___________________________________________________________________________________________

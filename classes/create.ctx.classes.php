@@ -59,6 +59,10 @@ function get_ctx($ctx_id=null)
 		ctx_dsr, 
 		ctx_type_id, 
 		types.type_name, 
+		ctx.pg_id, 
+		ctx.pg_obj_id, 
+		(Select obj_name From pg_objs, pgs Where pgs.id = ctx.pg_id and pg_obj_id = pg_objs.id) as pg_name, 
+		(Select obj_name From pg_objs Where id = ctx.pg_obj_id) as obj_name, 
 		ctx.spc_ord, 
 		ctx.act_bit 
 	From ctx, 
@@ -66,7 +70,7 @@ function get_ctx($ctx_id=null)
 	Where ctx.id = ? and 
 		ctx_type_id = types.id";
 
-	$output = array('ctx_name', 'ctx_lbl', 'ctx_dsr', 'ctx_type_id', 'ctx_type_name', 'ctx_spc_ord', 'ctx_act_bit');
+	$output = array('ctx_name', 'ctx_lbl', 'ctx_dsr', 'ctx_type_id', 'ctx_type_name', 'ctx_pg_id', 'ctx_pg_obj_id', 'ctx_pg_name', 'ctx_pg_obj_name', 'ctx_spc_ord', 'ctx_act_bit');
 	return row_pattern($ctx_sql, 'i', array('id'=>$ctx_id), $output);
 	}
 
@@ -84,6 +88,10 @@ function get_ctx_by_type($ctx_type_id=null, $flatten=false)
 		ctx_dsr, 
 		ctx_type_id, 
 		types.type_name, 
+		ctx.pg_id, 
+		ctx.pg_obj_id, 
+		(Select obj_name From pg_objs, pgs Where pgs.id = ctx.pg_id and pg_obj_id = pg_objs.id) as pg_name, 
+		(Select obj_name From pg_objs Where id = ctx.pg_obj_id) as obj_name, 
 		ctx.spc_ord, 
 		ctx.act_bit, 
 		CONCAT_WS('', ctx_name, ' (', ctx.id, ') ', '[', ctx_dsr, '] ') as opt_lbl 
@@ -94,7 +102,7 @@ function get_ctx_by_type($ctx_type_id=null, $flatten=false)
 	Order By ctx.spc_ord, 
 		ctx.ctx_name";
 
-	$output = array('ctx_id', 'ctx_name', 'ctx_lbl', 'ctx_dsr', 'ctx_type_id', 'ctx_type_name', 'ctx_spc_ord', 'ctx_act_bit', 'ctx_opt_lbl');
+	$output = array('ctx_id', 'ctx_name', 'ctx_lbl', 'ctx_dsr', 'ctx_type_id', 'ctx_type_name', 'ctx_pg_id', 'ctx_pg_obj_id', 'ctx_pg_name', 'ctx_pg_obj_name', 'ctx_spc_ord', 'ctx_act_bit', 'ctx_opt_lbl');
 
 	if ($flatten) {$call = 'col_pattern';} else {$call = 'tcol_pattern';}
 
@@ -102,37 +110,45 @@ function get_ctx_by_type($ctx_type_id=null, $flatten=false)
 	}
 
 //____________________________________________________________________________________
-function create_ctx($ctx_name=null, $ctx_lbl=null, $ctx_dsr=null, $spc_ord=null, $ctx_type_id=31)
+function create_ctx($ctx_name=null, $ctx_lbl=null, $ctx_dsr=null, $spc_ord=null, $ctx_type_id=31, $pg_id=null, $pg_obj_id=null)
 {
 	if (empty($ctx_name) || empty($ctx_lbl) ) {return null;}
 	if (empty($ctx_dsr) ) {$ctx_dsr = null;}
 	if (empty($spc_ord) || !check_index($spc_ord) ) {$spc_ord = null;}
 	if (!check_index($ctx_type_id) ) {$ctx_type_id = 31;}
+	if (empty($pg_id) || !check_index($pg_id) ) {$pg_id = null;}
+	if (empty($pg_obj_id) || !check_index($pg_obj_id) ) {$pg_obj_id = null;}
 
 	# Create a new context
 	$insert_sql = "Insert Ignore Into ctx (spc_ord, 
 		ctx_name, 
 		ctx_dsr, 
 		ctx_lbl, 
-		ctx_type_id) 
-	Values (?, ?, ?, ?, ?)";
+		ctx_type_id, 
+		pg_id, 
+		pg_obj_id) 
+	Values (?, ?, ?, ?, ?, ?, ?)";
 
 	$input = array('so'=>$spc_ord, 
 						'name'=>mb_prepstr($ctx_name, 31), 
 						'dsr'=>mb_prepstr($ctx_dsr, 127), 
 						'lbl'=>mb_prepstr($ctx_lbl, 31), 
-						'type'=>$ctx_type_id);
+						'type'=>$ctx_type_id, 
+						'pg_id'=>$pg_id, 
+						'pg_obj_id'=>$pg_obj_id);
 
-	return ins_pattern($insert_sql, 'isssi', $input);
+	return ins_pattern($insert_sql, 'isssiii', $input);
 	}
 
 //____________________________________________________________________________________
-function update_ctx($id=null, $ctx_name=null, $ctx_lbl=null, $ctx_dsr=null, $spc_ord=null)
+function update_ctx($id=null, $ctx_name=null, $ctx_lbl=null, $ctx_dsr=null, $spc_ord=null, $pg_id=null, $pg_obj_id=null)
 {
 	if (empty($ctx_name) || empty($ctx_lbl) ) {return null;}
 	if (empty($ctx_dsr) ) {$ctx_dsr = null;}
 	if (!check_index($id) ) {return null;}
 	if (!check_index($spc_ord) ) {$spc_ord = null;}
+	if (empty($pg_id) || !check_index($pg_id) ) {$pg_id = null;}
+	if (empty($pg_obj_id) || !check_index($pg_obj_id) ) {$pg_obj_id = null;}
 
 	# Update the selected context
 	$update_sql = "Update ctx 
@@ -140,6 +156,8 @@ function update_ctx($id=null, $ctx_name=null, $ctx_lbl=null, $ctx_dsr=null, $spc
 		ctx_name = ?, 
 		ctx_dsr = ?, 
 		ctx_lbl = ?, 
+		pg_id = ?, 
+		pg_obj_id = ?, 
 		spc_ord = ? 
 	Where 
 		id = ?";
@@ -147,10 +165,12 @@ function update_ctx($id=null, $ctx_name=null, $ctx_lbl=null, $ctx_dsr=null, $spc
 	$input = array('name'=>mb_prepstr($ctx_name, 31), 
 						'dsr'=>mb_prepstr($ctx_dsr, 127), 
 						'lbl'=>mb_prepstr($ctx_lbl, 31), 
+						'pg_id'=>$pg_id, 
+						'pg_obj_id'=>$pg_obj_id,
 						'so'=>$spc_ord, 
 						'id'=>$id);
 
-	return ins_pattern($update_sql, 'sssii', $input);
+	return ins_pattern($update_sql, 'sssiiii', $input);
 	}
 
 //____________________________________________________________________________________
@@ -163,6 +183,20 @@ function force_ctx_nulls()
 
 	$upd_0 = ins_pattern($update_0_sql);
 
+	# Set any 0 pg_id to null
+	$update_0_sql = "Update ctx 
+	Set pg_id = NULL 
+	Where pg_id = 0";
+
+	$upd_1 = ins_pattern($update_0_sql);
+
+	# Set any 0 pg_obj_id to null
+	$update_0_sql = "Update ctx 
+	Set pg_obj_id = NULL 
+	Where pg_obj_id = 0";
+
+	$upd_2 = ins_pattern($update_0_sql);
+
 	# Set any blank description to null
 	$update_dsr_sql = "Update ctx 
 	Set ctx_dsr = NULL 
@@ -170,7 +204,7 @@ function force_ctx_nulls()
 
 	$upd_dsr = ins_pattern($update_dsr_sql);
 
-	return array($upd_0, $upd_dsr);
+	return array($upd_0, $upd_1, $upd_2, $upd_dsr);
 	}
 
 //____________________________________________________________________________________
@@ -214,13 +248,17 @@ function get_act_ctx($pg_ctxs=false)
 		ctx_lbl, 
 		ctx_dsr, 
 		ctx_type_id, 
+		ctx.pg_id, 
+		ctx.pg_obj_id, 
+		(Select obj_name From pg_objs, pgs Where pgs.id = ctx.pg_id and pg_obj_id = pg_objs.id) as pg_name, 
+		(Select obj_name From pg_objs Where id = ctx.pg_obj_id) as obj_name, 
 		spc_ord 
 	From ctx 
 	Where act_bit $extra 
 	Order By spc_ord, 
 		ctx_name";
 
-	return tcol_pattern($sql, null, null, array('ctx_id', 'ctx_name', 'ctx_lbl', 'ctx_dsr', 'ctx_type_id', 'ctx_spc_ord') );
+	return tcol_pattern($sql, null, null, array('ctx_id', 'ctx_name', 'ctx_lbl', 'ctx_dsr', 'ctx_type_id', 'ctx_pg_id', 'ctx_pg_obj_id', 'ctx_pg_name', 'ctx_pg_obj_name', 'ctx_spc_ord') );
 	}
 
 //____________________________________________________________________________________

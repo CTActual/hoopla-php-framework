@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -28,24 +28,28 @@ or implied, of Cargotrader, Inc.
 */
 
 			// List the names of the default values, if any
-			$def_str = "Active default values exist for: ";
+			$def_str = "Active default values exist for context(s) <i>[Click on a Select button to modify]</i>: <br>";
 			$defcore = '';
 			
 			foreach ($def_vals as $def_val_key=>$def_ctx)
 			{
 				extract($def_ctx);
+
+				$trail = (strlen($def_val) > 511) ? ' ...' : '';
 				
-				$defcore .= "$def_ctx_name ($def_ctx_lbl) as $def_type_name, ";
+				$def_sub = $aoo('span', "class=mild_span;\ncore={$ps($def_val, 511)}$trail");
+				
+				$defcore .= "$def_ctx_name ($def_ctx_lbl) as $def_type_name ($def_type_std_lbl), $def_sub<br>";
 				}
 
 			if (count($def_vals) > 0)
 			{
 				$defcore = substr($defcore, 0, -2) . '.';
-				$def_str .= $aoo('span', "class=bold_span;\ncore=$defcore") . ' Click on Select to modify.';
+				$def_str .= $aoo('span', "class=bold_span;\ncore=$defcore");
 				
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="$bc " colspan="$colspan">$def_str</td>\n
+    <td style="$bc" colspan="$colspan">$def_str</td>\n
  </tr>\n
 TABLEDATA;
 

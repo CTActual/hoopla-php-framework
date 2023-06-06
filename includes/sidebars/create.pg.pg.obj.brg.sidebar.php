@@ -43,7 +43,7 @@
 		<div class="sidebar">
           <div class="sidebar_item">
             <h2>Special Order</h2>
-            <p>Order your objects within the framework (not the page).</p>         
+            <p>Order your objects within the framework, both for the GUI and when values are returned by context.</p>         
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->  		
 

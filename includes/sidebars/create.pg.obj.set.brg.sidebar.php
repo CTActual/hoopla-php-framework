@@ -1,7 +1,7 @@
 		<div class="sidebar">
           <div class="sidebar_item">
             <h2>Object Setting Bridge</h2>
-            <p>Choose which setting go with which page objects.</p>
+            <p>Choose which setting types go with which page objects.</p>
           </div><!--close sidebar_item--> 
         </div><!--close sidebar-->     		
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2021 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -32,7 +32,6 @@ require_once('hoopla.fw.rel.path.php');
 include($classpath . "html.obj.classes.php");
 
 ?>
-
 <!DOCTYPE html> 
 <html>
 
@@ -92,15 +91,23 @@ include($classpath . "html.obj.classes.php");
 
 		<p><b>What about performance?</b></p>
 
-		<p><i>Performance should be pretty good if you maintain the HFW database indexes.  It&apos;s a comparatively small database for performance considerations.  With some work, you could probably load it into ram for even better performance.</i></p>
+		<p><i>Performance should be pretty good if you maintain the HFW database indexes.  It&apos;s a comparatively small database for performance considerations.  With some work, you could probably load it into ram for even better performance, though MySQL query caching is basically that already.</i></p>
 
 		<p><b>Where&apos;s the Armenian version?</b></p>
 
-		<p><i>While an Armenian version would be great, our team is too small and too inexperienced to create one.  American English for now, thanks.</i></p>
+		<p><i>While an Armenian version would be great, our team is too small and too parochial to create one.  American English for now, thanks.</i></p>
 
 		<p><b>Why are there no GUI settings?</b></p>
 
 		<p><i>We don&apos;t have enough feedback from users yet to know what settings would be a good idea, though the basic layout seems to work just fine as is.  Most of the time, settings rarely get used to the degree they are requested, but no suggestion is too small.</i></p>
+
+		<p><b>Egad!  Why is the GUI for the Values-by-Page and Values-by-Object pages so complicated?</b></p>
+
+		<p><i>These are the main pages that you will be using when working on a project, and have to deal with a lot of interrelationships between pages, contexts, setting types and objects.  They aren&apos;t that complicated, in reality, once you are familiar with how the framework goes.  They are visually busy, but actually have a linear top-down workflow pattern.  The basic workflow for the GUI is from left to right and top to bottom.  The exception would be when you add contexts to your project, which we put to the right because of their general indepedence from the page-object theme.  On-page help is provided in the left column on each page.</i></p>
+
+		<p><b>Is the code well documented?</b></p>
+
+		<p><i>Of main interest for anyone developing a new project using the HFW are the descriptions of the export library function calls, which are located both in the source code and also here in the help system.  The demo project code is also well documented for the most part, with comments throughout, though in-line with the code and not presented as a how-to manual.  The code that runs the GUI and ancilliary libraries is mostly only of interest to HFW developers and not users, but the PHP HTML Object Classes library code could be of use to a user, though it is not super-well documented.</i></p>
 
 		<p><b>I encapsulate my queries in classes and functions.  Now you want me to store them in a database?</b></p>
 
@@ -108,7 +115,7 @@ include($classpath . "html.obj.classes.php");
 
 		<p><b>Why go the publishing to a website route instead of putting the whole GUI framework on the production server?</b></p>
 
-		<p><i>Nothing prevents a user from either hosting the application on their production server or writing trackback queries in their main application to change values in the HFW database.  However, having a single master version of the site HFW database will avoid confusion and not putting the whole thing on the production server will be more secure.</i></p>
+		<p><i>Nothing prevents a user from either hosting the application on their production server or writing trackback queries in their main application to change values in the HFW database.  However, having a single master version of the site HFW database will avoid confusion and not putting the whole thing on the production server will be more secure.  Another way to think about this is that you probably would not edit your PHP project code on your production server either, and this is not a Wordpress clone.</i></p>
 
 		<p><b>Is a page also an object?</b></p>
 

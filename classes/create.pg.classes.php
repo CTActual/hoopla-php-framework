@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -76,16 +76,16 @@ function get_pg_list($pg_ctx_id=null)
 		pg_objs.id";
 
 	$result_array_1 = array(	'obj_id', 
-									'obj_name', 
-									'obj_dsr', 
-									'url_tag', 
-									'pg_ord', 
-									'acs_str', 
-									'pg_id', 
-									'pg_ctx_id', 
-									'pg_ctx_name', 
-									'pg_ctx_lbl', 
-									'act_bit');
+										'obj_name', 
+										'obj_dsr', 
+										'url_tag', 
+										'pg_ord', 
+										'acs_str', 
+										'pg_id', 
+										'pg_ctx_id', 
+										'pg_ctx_name', 
+										'pg_ctx_lbl', 
+										'act_bit');
 
 	return tcol_pattern($obj_sql, $str, $input, $result_array_1);
 	}

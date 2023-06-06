@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2011-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2011-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -494,7 +494,7 @@ class hoopla_get_ctx_vals
 {
 	public $output=null;
 
-	function __construct($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, $val_pg=null, $named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null, $named_val_pg=null, $get_def_bit=true)
+	function __construct($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, $val_pg=null, $named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null, $named_val_pg=null, $get_def_bit=true, $loc_filter=null)
 	{
 		// This class retrieves values vertically based on context, with various filters.
 		// This class ignores null values and will pull in defaults automatically.
@@ -504,16 +504,19 @@ class hoopla_get_ctx_vals
 		
 		if (!empty($named_ctx) && !is_array($named_ctx) && !is_array($ctx) )
 		{
+			// Single named context
 			$ctx_id = get_hfw_ctx_id_from_lbl($named_ctx);
 			$ctx_id = (hfw_check_index($ctx_id) ) ? $ctx_id : ( (hfw_check_index($ctx) ) ? $ctx : 1);
 			}
 		elseif (!empty($named_ctx) && !is_array($named_ctx) && is_array($ctx) )
 		{
+			// Single named context is used over the context id sent
 			$ctx_id = get_hfw_ctx_id_from_lbl($named_ctx);
 			$ctx_id = (hfw_check_index($ctx_id) ) ? $ctx_id : 1;
 			}
 		elseif (!empty($named_ctx) && is_array($named_ctx) && count($named_ctx) > 0)
 		{
+			// Array of named contexts
 			$ctxs = array();
 			
 			foreach ($named_ctx as $k=>$nc)
@@ -525,12 +528,14 @@ class hoopla_get_ctx_vals
 			}
 		elseif (empty($named_ctx) && !empty($ctx) && is_array($ctx) && count($ctx) > 0)
 		{
+			// Array of context ids
 			$ctxs = array();
 			
-			foreach ($ctx as $k=>$nc)
+			// Check for possible index values
+			foreach ($ctx as $k=>$t)
 			{
-				$t = get_hfw_ctx_id_from_lbl($nc);
-				$ctxs[] = (hfw_check_index($t) ) ? $t : 1;
+				if (hfw_check_index($t) )
+					{$ctxs[] = $t;}
 				}
 			$ctx_id = (count($ctxs) > 0) ? $ctxs : 1;
 			}
@@ -538,13 +543,45 @@ class hoopla_get_ctx_vals
 		{
 			$ctx_id = (hfw_check_index($ctx) ) ? $ctx : 1;
 			}
+		else {$ctx_id = 1;}
 			
 		// The object type is not required, but can be used as a filter
-		if (!empty($named_obj_type) )
-			{$obj_type_id = get_hfw_type_id_from_lbl($named_obj_type);}
+		$obj_type_id = null;
 		
-		$obj_type_id = (hfw_check_index($obj_type_id) ) ? $obj_type_id : ( (hfw_check_index($obj_type) ) ? $obj_type : null);
-		
+		if (isset($named_obj_type) && !empty($named_obj_type) )
+		{
+			if (!is_array($named_obj_type) )
+			{
+				$obj_type_id = get_hfw_type_id_from_lbl($named_obj_type);
+				$obj_type_id = (hfw_check_index($obj_type_id) ) ? $obj_type_id : ( (isset($obj_type) && !is_array($obj_type) && hfw_check_index($obj_type) ) ? $obj_type : null);
+				}
+			else
+			{
+				$obj_type_ids = array();
+				
+				foreach ($named_obj_type as $not)
+				{
+					$obj_type_id = get_hfw_type_id_from_lbl($not);
+					
+					if (hfw_check_index($obj_type_id) )
+					{
+						$obj_type_ids[] = $obj_type_id;
+						}
+					}	# End of foreach
+				$obj_type_id = $obj_type_ids;
+				unset($obj_type_ids);
+				}	# End of else
+			}	# End of $named_obj_type conditional
+		elseif (isset($obj_type) && !is_array($obj_type) && hfw_check_index($obj_type) ) 
+			{$obj_type_id = $obj_type;}
+		elseif (isset($obj_type) && is_array($obj_type) && !empty($obj_type) )
+		{
+			foreach ($obj_type as $ot)
+			{
+				if (hfw_check_index($ot) ) {$obj_type_id[] = $ot;}
+				}
+			}
+					
 		// The setting type is not required, but can be used as a filter
 		if (!empty($named_set_type) )
 			{$set_type_id = get_hfw_type_id_from_lbl($named_set_type);}
@@ -575,7 +612,7 @@ class hoopla_get_ctx_vals
 		$input = array();
 		
 		// We need to deal with the fact $ctx_id might be an array
-		if (is_array($ctx_id) && count($ctx_id) > 0)
+		if (isset($ctx_id) && is_array($ctx_id) && count($ctx_id) > 0)
 		{
 			$ctx_row = "p.ctx_id IN (";
 			
@@ -596,13 +633,30 @@ class hoopla_get_ctx_vals
 		$set_type_extra = "";
 		$asc_pg_extra = "";
 		$val_pg_extra = "";
+		$lf_extra = "";
 		
 		// We go through with adding additional filters
-		if (hfw_check_index($obj_type_id) )
+		if (isset($obj_type_id) && !is_array($obj_type_id) )
 		{
-			$i .= 'i';
-			$input['obj_type_id'] = $obj_type_id;
-			$obj_type_extra = "po.pg_obj_type_id = ? and ";
+			if (hfw_check_index($obj_type_id) )
+			{
+				$i .= 'i';
+				$input['obj_type_id'] = $obj_type_id;
+				$obj_type_extra = "po.pg_obj_type_id = ? and ";
+				}
+			}
+		elseif (isset($obj_type_id) && !empty($obj_type_id) )
+		{
+			$obj_type_extra = "po.pg_obj_type_id IN (";
+			$oti_row = '';
+			
+			foreach ($obj_type_id as $oti)
+			{
+				$oti_row .= "$oti,";
+				}
+			$oti_row = substr($oti_row, 0, -2);
+			$obj_type_extra .= $oti_row . ") and ";
+			unset($oti_row);
 			}
 			
 		if (hfw_check_index($set_type_id) )
@@ -631,6 +685,30 @@ class hoopla_get_ctx_vals
 				{$val_pg_extra = "p.pg_id = ? and ";}
 			}
 			
+		// We can zero in on particular locations
+		if (isset($loc_filter) && !empty($loc_filter) )
+		{
+			if (!is_array($loc_filter) )
+			{
+				$i .= 's';
+				$input['lf'] = $loc_filter;
+				
+				$lf_extra = "ppob.pg_obj_loc = ? and ";
+				}
+			else
+			{
+				$lf_extra = "ppob.pg_obj_loc In (";
+				$lf_row = '';
+				
+				foreach ($loc_filter as $lf)
+				{
+					$lf_row .= "'$lf', ";
+					}
+				$lf_row = substr($lf_row, 0, -2);
+				$lf_extra .= $lf_row . ") and ";
+				}
+			}
+			
 		// Compile the query
 		$query = "Select p.id, 
 			p.pg_obj_id, 
@@ -640,6 +718,7 @@ class hoopla_get_ctx_vals
 			p.ctx_id, 
 			ctx.ctx_name, 
 			ctx.ctx_lbl, 
+			ctx.spc_ord, 
 			set_type.type_name, 
 			set_type.std_type_lbl, 
 			obj_type.type_name, 
@@ -668,12 +747,14 @@ class hoopla_get_ctx_vals
 			$set_type_extra 
 			$asc_pg_extra 
 			$val_pg_extra 
+			$lf_extra 
 			obj_type.id = po.pg_obj_type_id 
 		Order By ppob.spc_ord, 
+			ctx.spc_ord, 
 			po.obj_name, 
 			p.pg_id DESC";
 			
-		$output = array('set_val_id', 'pg_obj_id', 'pg_obj_set_type_id', 'val', 'set_val_pg_id', 'ctx_id', 'ctx_name', 'ctx_lbl', 
+		$output = array('set_val_id', 'pg_obj_id', 'pg_obj_set_type_id', 'val', 'set_val_pg_id', 'ctx_id', 'ctx_name', 'ctx_lbl', 'ctx_spc_ord', 
 								'set_type_name', 'set_type_lbl', 'obj_type_name', 'obj_type_lbl', 'obj_name', 'asc_pg_id', 
 								'asc_pg_obj_loc', 'obj_spec_ord', 'use_def_bit');
 
@@ -684,11 +765,11 @@ class hoopla_get_ctx_vals
 	}	# End of hoopla_get_ctx_vals class
 
 //_____________________________________________________________________________________________________
-function hfw_get_ctx_vals($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, $val_pg=null, $named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null,  $named_val_pg=null, $get_def_bit=true)
+function hfw_get_ctx_vals($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, $val_pg=null, $named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null,  $named_val_pg=null, $get_def_bit=true, $loc_filter=null)
 {
 	if (!hfw_check_index($ctx) ) {$ctx = 1;}
 
-	$set_val_obj = new hoopla_get_ctx_vals($ctx, $obj_type, $set_type, $asc_pg, $val_pg, $named_ctx, $named_obj_type, $named_set_type, $named_asc_pg, $named_val_pg, $get_def_bit);
+	$set_val_obj = new hoopla_get_ctx_vals($ctx, $obj_type, $set_type, $asc_pg, $val_pg, $named_ctx, $named_obj_type, $named_set_type, $named_asc_pg, $named_val_pg, $get_def_bit, $loc_filter);
 
 	$set = $set_val_obj->output;
 
@@ -710,21 +791,22 @@ function hfw_get_ctx_vals($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, 
 
 	INPUT: ($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, $named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null)
 		$ctx						required [num or array of num], default value=1 (this is the context id, but can be overruled by the named context)
-		$obj_type				not required (the type id of the page object, which can be overruled by the named obj type label)
+		$obj_type				not required [index or array of indices], default value=null (the type id of the page object, which can be overruled by the named obj type label)
 		$set_type				not required (the type id of the setting, which can be overruled by the named setting type label)
 		$asc_pg					not required (the page id of the object associated page, not the setting value page, and can be overruled by the named associated page)
 		$val_pg					not required (the page id of the setting value page, and can be overruled by the named value page)
 		$named_ctx			not required [string or array of strings], default value=null (this is the text alias/shorthand name for a context, which will override the id entered for $ctx)
-		$named_obj_type	not required, default value=null (this is the object type name alias, which will override any entry for $obj_type)
+		$named_obj_type	not required [string or array of strings], default value=null (this is the object type name alias, which will override any entry for $obj_type)
 		$named_set_type	not required, default value=null (this is the set type name alias, which will override any entry for $set_type)
 		$named_asc_pg		not required (the page tag of the object associated page, not the setting value page, which will override any entry to $asc_pg)
 		$named_val_pg		not required (the page tag of the setting value page, which will override any entry to $val_pg)
 		$get_def_bit			required, default value=true (retreive default values if true, or only page values if false, if the setting value page has been set)
+		$loc_filter				not required [string or array of strings], default value=null (the location tag(s) of the values desired)
 
 	Typical INPUT example, calling a context, object type and setting type by name: $hfwgcv(null, null, null, null, 'ctx1', 'frm_obj', 'html')
 	The same using ids: $hfwgcv(2, 8, 19)
 
-	OUTPUT: The output array is array[0 ... N]['set_val_id'=>the setting id, 'pg_obj_id'=>the page object id, 'pg_obj_set_type_id'=>the page object setting type id, 'val'=>the setting value, 'set_val_pg_id'=>the page id for the setting value-if any, 'ctx_id'=>context id, 'ctx_name'=>context name, 'ctx_lbl'=>context label, 'set_type_name'=>the type name, 'set_type_lbl'=>the setting type label, 'obj_type_name'=>the page object type name, 'obj_type_lbl'=>the page object type label, 'obj_name'=>the object label, 'asc_pg_id'=>the id of the object associated page, 'asc_pg_obj_loc'=>the label tag of the object associated page]
+	OUTPUT: The output array is array[0 ... N]['set_val_id'=>the setting id, 'pg_obj_id'=>the page object id, 'pg_obj_set_type_id'=>the page object setting type id, 'val'=>the setting value, 'set_val_pg_id'=>the page id for the setting value-if any, 'ctx_id'=>context id, 'ctx_name'=>context name, 'ctx_lbl'=>context label, 'ctx_spc_ord'=>context special order, 'set_type_name'=>the type name, 'set_type_lbl'=>the setting type label, 'obj_type_name'=>the page object type name, 'obj_type_lbl'=>the page object type label, 'obj_name'=>the object label, 'asc_pg_id'=>the id of the object associated page, 'asc_pg_obj_loc'=>the label tag of the object associated page]
 		A minimum of one context can be returned since a context is required, even if only the default context.
 		Default values are returned if the obj use default bit is set.   These will need to be handled in code if there are page specific values as well.
 		If no page is used as an object filter, then all the objects of a given context, object type (if any) and setting type (if any) will be returned.
@@ -734,9 +816,9 @@ function hfw_get_ctx_vals($ctx=1, $obj_type=null, $set_type=null, $asc_pg=null, 
 */
 	
 //_____________________________________________________________________________________________________
-function hfwn_get_ctx_vals($named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null, $named_val_pg=null, $get_def_bit=true)
+function hfwn_get_ctx_vals($named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null, $named_val_pg=null, $get_def_bit=true, $loc_filter=null)
 {
-	$set_val_obj = new hoopla_get_ctx_vals(null, null, null, null, null, $named_ctx, $named_obj_type, $named_set_type, $named_asc_pg, $named_val_pg, $get_def_bit);
+	$set_val_obj = new hoopla_get_ctx_vals(null, null, null, null, null, $named_ctx, $named_obj_type, $named_set_type, $named_asc_pg, $named_val_pg, $get_def_bit, $loc_filter);
 
 	$set = $set_val_obj->output;
 
@@ -758,16 +840,17 @@ function hfwn_get_ctx_vals($named_ctx=null, $named_obj_type=null, $named_set_typ
 
 	INPUT: ($named_ctx=null, $named_obj_type=null, $named_set_type=null, $named_asc_pg=null)
 		$named_ctx			not required [string or array of strings], default value=null (this is the text alias/shorthand name for a context.  If no value is entered then the default context is assumed)
-		$named_obj_type	not required, default value=null (this is the object type name alias)
+		$named_obj_type	not required [string or array of strings], default value=null (this is the object type name alias)
 		$named_set_type	not required, default value=null (this is the set type name alias)
 		$named_asc_pg		not required (the page tag of the object associated page, not the setting value page)
 		$named_val_pg		not required (the page tag of the setting value page)
 		$get_def_bit			required, default value=true (retreive default values if true, or only page values if false, if the setting value page has been set)
+		$loc_filter				not required [string or array of strings], default value=null (the location tag(s) of the values desired)
 
 	Typical INPUT example, calling a context, object type and setting type by name: $hfwngcv('ctx1', 'frm_obj', 'html')
 	Getting the default context values for objects associated with the given page: $hfwngcv(null, null, null, 'pg')
 
-	OUTPUT: The output array is array[0 ... N]['set_val_id'=>the setting id, 'pg_obj_id'=>the page object id, 'pg_obj_set_type_id'=>the page object setting type id, 'val'=>the setting value, 'set_val_pg_id'=>the page id for the setting value-if any, 'ctx_id'=>context id, 'ctx_name'=>context name, 'ctx_lbl'=>context label, 'set_type_name'=>the type name, 'set_type_lbl'=>the setting type label, 'obj_type_name'=>the page object type name, 'obj_type_lbl'=>the page object type label, 'obj_name'=>the object label, 'asc_pg_id'=>the id of the object associated page, 'asc_pg_obj_loc'=>the label tag of the object associated page]
+	OUTPUT: The output array is array[0 ... N]['set_val_id'=>the setting id, 'pg_obj_id'=>the page object id, 'pg_obj_set_type_id'=>the page object setting type id, 'val'=>the setting value, 'set_val_pg_id'=>the page id for the setting value-if any, 'ctx_id'=>context id, 'ctx_name'=>context name, 'ctx_lbl'=>context label, 'ctx_spc_ord'=>context special order, 'set_type_name'=>the type name, 'set_type_lbl'=>the setting type label, 'obj_type_name'=>the page object type name, 'obj_type_lbl'=>the page object type label, 'obj_name'=>the object label, 'asc_pg_id'=>the id of the object associated page, 'asc_pg_obj_loc'=>the label tag of the object associated page]
 		A minimum of one context can be returned since a context is required, even if only the default context.
 		Default values are returned if the obj use default bit is set.   These will need to be handled in code if there are page specific values as well.
 		If no page is used as an object filter, then all the objects of a given context, object type (if any) and setting type (if any) will be returned.

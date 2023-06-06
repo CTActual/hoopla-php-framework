@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2021 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -39,6 +39,11 @@ or implied, of Cargotrader, Inc.
 			foreach ($act_ctxes as $ctx_key=>$ctx)
 			{
 				extract($ctx);
+				
+				// We don't show specific contexts that don't match the page or object
+				if (check_index($ctx_pg_id) && $ctx_pg_id != $pg_id) {continue;}
+				if (check_index($ctx_pg_obj_id) && $ctx_pg_obj_id != $sel_obj_id) {continue;}
+				
 				$ctx_hid = $aoo('hidden', "name=ctx_hid[$i];\nvalue=$ctx_id");
 				$sel_ctx_name_span = $aoo('span', "core=$ctx_name ($ctx_lbl)");
 
@@ -59,6 +64,7 @@ TABLETOP;
 				$tabledata = "";
 				$val_size = 0;
 				
+				// Deal with both page specific and default values.
 				for ($j=1;$j<3;$j++)
 				{
 					// $j == 1 for the pg specific value, and $j == 2 for the default value
@@ -87,7 +93,7 @@ TABLETOP;
 					unset($val_act_bit);
 					$val_id = null;
 					$val = null;
-					extract(get_val($sel_obj_id, $_POST['obj_sets'], $com_pg_id, $ctx_id) );
+					extract(get_val($sel_obj_id, $post_obj_sets, $com_pg_id, $ctx_id) );
 
 					if (isset($val_id) && check_index($val_id) ) 
 					{
@@ -127,7 +133,7 @@ TABLEDATA;
 				echo $aoo('details', "{$open}core=$total_table");
 				echo "<br>\n";
 				$i++;
-				}	# End of context loop
+				}	# End of foreach context loop
 
 			echo $aoo('button', "class=button_passive;\nname=objvals;\nvalue=true;\nlabel=Save or Update Values");
 			echo "</fieldset><br>";

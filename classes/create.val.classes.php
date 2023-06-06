@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -113,6 +113,33 @@ function get_vals_by_pg_and_obj($pg_id=null, $pg_obj_id=null)
 	return tcol_pattern($sql, 'ii', array('pg'=>$pg_id, 'obj'=>$pg_obj_id), $output);
 	}
 
+//____________________________________________________________________________________
+function get_pg_val_set_type_ids($pg_id=null, $pg_obj_id=null)
+{
+	if (!check_index($pg_id) || !check_index($pg_obj_id) ) {return null;}
+
+	# Get the distinct page or default object setting types for marking
+	$sql = "Select Distinct p.pg_obj_set_type_id 
+	From pg_obj_pg_obj_set_val_brg as p, 
+		types as t1, 
+		types as t2, 
+		ctx as c 
+	Where (p.pg_id = ? or p.pg_id Is Null) and 
+		p.pg_obj_id = ? and 
+		p.pg_obj_set_type_id = t1.id and 
+		p.pg_obj_set_val Is Not Null and 
+		p.pg_obj_set_val != '' and 
+		p.ctx_id = c.id and 
+		c.ctx_type_id = t2.id and 
+		t1.act_bit and 
+		t2.act_bit and 
+		c.act_bit";
+
+	$output = array('val_pg_obj_set_type_id');
+
+	return col_pattern($sql, 'ii', array('pg'=>$pg_id, 'obj'=>$pg_obj_id), $output);
+	}
+	
 //____________________________________________________________________________________
 function evaluate_entries($pg_obj_id=null, $pg_obj_set_type_id=null, $pg_id=null, $ctx_id=1, $val_id=null, $active=null, $act_bit=null, $val=null)
 {
@@ -264,7 +291,7 @@ function det_num_of_set_types_per_obj($obj_id=null, $pg_id=null)
 	$sql = "Select count(id) From 
 				(Select Distinct pg_obj_set_type_id as id
 				From pg_obj_pg_obj_set_val_brg 
-				Where pg_id = ? and 
+				Where (pg_id = ? or pg_id Is NULL) and 
 					pg_obj_id = ?) as di";
 
 	return row_pattern($sql, 'ii', array('pg'=>$pg_id, 'obj'=>$obj_id), array('count') );
@@ -279,6 +306,7 @@ function chk_for_def_vals($pg_obj_id=null)
 		c.ctx_lbl, 
 		c.id, 
 		t.type_name, 
+		t.std_type_lbl, 
 		t.id, 
 		p.pg_obj_set_val 
 	From pg_obj_pg_obj_set_val_brg as p, 
@@ -295,11 +323,19 @@ function chk_for_def_vals($pg_obj_id=null)
 	Order By c.spc_ord, 
 		c.ctx_lbl";
 
-	return tcol_pattern($sql, 'i', array('obj'=>$pg_obj_id), array('def_ctx_name', 'def_ctx_lbl', 'def_ctx_id', 'def_type_name', 'def_type_id', 'def_val') );
+	return tcol_pattern($sql, 'i', array('obj'=>$pg_obj_id), array('def_ctx_name', 'def_ctx_lbl', 'def_ctx_id', 'def_type_name', 'def_type_std_lbl', 'def_type_id', 'def_val') );
 	}
 
 //____________________________________________________________________________________
-
+function clean_up_null_vals()
+{
+	$query = "Delete From pg_obj_pg_obj_set_val_brg 
+		Where pg_obj_set_val Is NULL";
+		
+	return del_pattern($query);
+	}
+	
+//____________________________________________________________________________________
 
 
 ?>

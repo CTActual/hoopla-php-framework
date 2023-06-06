@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -32,7 +32,6 @@ require_once('hoopla.fw.rel.path.php');
 include($classpath . "html.obj.classes.php");
 
 ?>
-
 <!DOCTYPE html> 
 <html>
 
@@ -79,11 +78,11 @@ include($classpath . "html.obj.classes.php");
 		  </div>--><!--close content_imagetext-->
 		  
 		    <p>Do you find Wordpress&trade; too restrictive?  Since you create your own templates, you are in control.  You create your site locally and then publish your stuff, the Hoople FW database and classes to your public website for consumption.
-			The published Hoople FW database can be essentially read only, thereby avoiding security issues associated with CMS frameworks.  (We don&apos;t recommend porting the framework UI code you see here to your site unless under some 
+			The published Hoople FW database is read only, thereby avoiding security issues associated with CMS frameworks.  (We don&apos;t recommend porting the framework UI code you see here to your site unless under some 
 			kind of security umbrella of your choosing).  Remember, you can create an article or &quot;blog&quot; publishing site that uses your own database to host the contents, and uses the Hoople FW database to host the layout and queries, so you do not need
 			the FW to host your actual content.  You can probably use the Hoopla FW in conjunction with other frameworks.  It&apos;s very unrestrictive.</p>
 
-		    <p>Annoyed by the limits on queries imposed by other frameworks?  While frameworks can make dealing with databases easier, they tend to allow only the simplest of queries.  Here, you write the queries you want, or call a stored procedure and process 
+		    <p>Annoyed by the limits on queries imposed by other frameworks?  While frameworks can make dealing with databases easier, they tend to allow only atomic queries.  Here, you write the queries you want, or call a stored procedure and process 
 		them as you need to.  You are not technically limited to MySQL for your own database.  While you would need to host MySQL for all Hoopla FW objects, and retrieve values using the associated classes, the queries retrieved (even the connection strings), 
 		can point elsewhere.</p>
 

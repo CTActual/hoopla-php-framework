@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -55,15 +55,17 @@ or implied, of Cargotrader, Inc.
 							
 							$class = "class=button_active;\n";
 							$butlabel = "Save";
+							$div_id = "id=openbox;\n";
 							} 
 						else 
 						{
 							$val_box = "";
 							$class="class=button_passive;\n";
 							$butlabel = "Edit";
+							$div_id = "";
 							}
 							
-						$toprow = $aoo('div', "style=margin-bottom:3px;;\ncore={$active_val}Value Entered For");
+						$toprow = $aoo('div', "{$div_id}style=margin-bottom:3px;;\ncore={$active_val}Value Entered For");
 						$strow = $aoo('div', "style=margin-top:3px; margin-bottom:10px;;\ncore=Setting Type: {$st}&nbsp;{$stlbl}");
 						$val_dsr = "{$toprow}Context Type: {$pg_obj_val['val_ctx_type_name']} - {$val_ctx_name}$val_ctx_lbl<br>$strow{$obj_val_sub}$val_box";
 
@@ -71,8 +73,8 @@ or implied, of Cargotrader, Inc.
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="$bc " colspan="$colspan">$val_dsr</td>\n
-    <td style="text-align:center; $bc ">$editbut</td>\n
+    <td style="$bc" colspan="$colspan">$val_dsr</td>\n
+    <td style="text-align:center; $bc">$editbut</td>\n
 </tr>\n
 TABLEDATA;
 

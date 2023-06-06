@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -32,7 +32,6 @@ require_once('hoopla.fw.rel.path.php');
 include($classpath . "html.obj.classes.php");
 
 ?>
-
 <!DOCTYPE html> 
 <html>
 
@@ -114,12 +113,12 @@ include($classpath . "html.obj.classes.php");
 			<li>Hoopla can hold almost anything that an HTML page can need, but a balance should be struck between how much is dynamic in practice and how much is really static.</li>
 			<li>You need to decide how to mix the content in the Hoopla database with the content in your main project database.</li>
 			<li>It is not recommended that you modify the Hoopla database (adding tables and&sol;or fields) for your project since this can break things and lead to update hell.</li>
-			<li>You can change the background settings for types in the UI as you like.  You are encouraged to make both object setting (arbitrary) contexts and page contexts as needed for your project.</li>
+			<li>You can change the background settings for types in the UI as you like.  You are encouraged to make both object setting (arbitrary or specific) contexts and page contexts as needed for your project.</li>
 			<li>You might be coordinating several databases in your project.  What Hoopla can store are things like connection strings and queries that deal with those other databases.</li>
 			<li><b>Hoopla is not the best content management system.</b></li>
-			<li>You might be tempted to use Hoopla for content management, but that is probably a mistake since it is statically published.</li>
+			<li>You might be tempted to use Hoopla for content management, but that is probably a mistake since it is statically published and read only.</li>
 			<li>Think of Hoopla as something you can use to create a content management system (CMS) instead.</li>
-			<li>There should be a demo project/website available for you to get a handle on things, and which might contain useful helper classes for parsing and output.</li>
+			<li>We have created a demo project/website available for you to get a handle on things, and which contains potentially useful helper classes for parsing and output.</li>
 			<li><div class="button_link"><a href="help/hoopla.fw.help.create.prj.php">More on Creating Websites</a></div></li>
 		</ul>
 		
@@ -144,7 +143,7 @@ include($classpath . "html.obj.classes.php");
 		<ul>
 			<li>We provide a basic stockade of exported functions and classes that get published with the databse to the production server for retrieving output on the templates.</li>
 			<li>You can certainly create more if you like.  Once you are familiar with how the Hoopla database works, you can easily expand on the functions and classes.</li>
-			<li>The stock functions will help you retrieve information out of the Hoopla database, but parsing this information and outputting it to generate HTML is up to your template.</li>
+			<li>The stock functions will help you retrieve information out of the Hoopla database, but parsing this information and outputting it to generate HTML is up to your template and project PHP libraries.</li>
 			<li>You will need to make sure that the connection string information on the exported hfw.db.info.php file is correct, and file paths are well understood.</li>
 			<li><div class="button_link"><a href="help/hoopla.fw.help.export.lib.php">Export Library Help</a></div></li>
 		</ul>

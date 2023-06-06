@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -51,6 +51,7 @@ or implied, of Cargotrader, Inc.
 		$post_pg_id = (isset($_POST['pg_id']) && check_index($_POST['pg_id']) ) ? $_POST['pg_id'] : '';
 		echo $aoo('select', "class=sel_css;\nname=pg_id;\ncore={$aoo('option', "value={$pg_id_list['pg_id']};\ntval={$post_pg_id};\nlabel={$pg_id_list['pg_dsr']};\nlabelaft=&nbsp;")};\nonchange=clickB()");
 
+		//"
 		echo $aoo('button', "class=button_passive;\nname=selpage;\nvalue=true;\nlabel=Select Page;\nid=seltype");
 		
 		// If the page is reloading page=true, and we want the existing value of obj_filter to have precedence

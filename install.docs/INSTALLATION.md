@@ -1,4 +1,4 @@
-
+===============================
 Hoopla Framework Installation Instructions
 ===============================
 
@@ -13,18 +13,19 @@ The following steps serve as an outline (details to follow):
 7.  Make sure your application pages can connect with the Hoopla database.
 
 
-System Requirements
+===============================
+		System Requirements
 ===============================
 
 Any local server that can handle PHP 5.6+ and MySQL 5.3+ should be able to install the IDE and database.
-PHP versions 7+ recommended, and MySQL 5.7+ recommended.
+PHP versions 7+ recommended, and MySQL 8.0+ recommended.
 Modern browsers recommended for the IDE.
 Please read the detail installation instructions for caveats.
 Future updates might require a change in the hosting environment.
 
 
-
-Detailed Installation Instructions
+===============================
+		Detailed Installation Instructions
 ===============================
 
 1. Set up a local PHP and MySQL web (HTTP) server for installing the framework IDE and developing the web application.
@@ -33,7 +34,8 @@ Detailed Installation Instructions
 
 	A typical setup would be a modern LAMP stack.  As the IDE is a network available application (depending on the web hosting settings), 
 the work of designing the website does not have to be on the same machine as the IDE or database.
-If Apache 2 is not desired, then NGINX may be suitable.  For MySQL, the use of MyISAM tables might limit one to the version from Oracle.
+
+	If Apache is not desired, then NGINX may be suitable.  For MySQL, the use of MyISAM tables might limit one to the version from Oracle.
 
 	For PHP, the main issue will be error handling, which should not be so broad as to contantly show warnings and notifications that can normally be safely ignored.
 
@@ -41,7 +43,7 @@ If Apache 2 is not desired, then NGINX may be suitable.  For MySQL, the use of M
 
 	For MySQL, the main issue will be allowing the correct character sets and collations to work properly, which is something that can be a challenge with differing versions of MySQL.
 
-	It would be possible to use the latest UTF8MB4 collation available (such as 0900) by rescripting the database installation, though the generic unicode version provided should work fine in most cases.
+	The database install script uses a UTF8MB4 collation (utf8mb4_0900_ai_ci), but by rescripting the database installation, a generic unicode version should work fine in most cases.
 
 	This caveat is important because of the simple default Latin-1 setups that MySQL frequently comes with and which should be changed quickly after installing MySQL.
 
@@ -49,7 +51,7 @@ If Apache 2 is not desired, then NGINX may be suitable.  For MySQL, the use of M
 
 	Once the web server is up and running, you will need to use the database and user installer scripts found in "install.scripts" to set up the Hoopla database and users.
 
-	Please be careful to check these scripts against your version of MySQL as more recent versions of MySQL (8+) might use a different syntax, particularly for user installation.
+	Please be careful to check these scripts against your version of MySQL as more recent versions of MySQL (8+) use a newer syntax, particularly for user installation.
 
 	You will need the correct privileges within MySQL to run these scripts.  The Root MySQL user can certainly do this.
 
@@ -61,7 +63,7 @@ If Apache 2 is not desired, then NGINX may be suitable.  For MySQL, the use of M
 
 	We provide create MySQL user scripts for "localhost", though you can swap that out with "127.0.0.1" as you see fit.  If your MySQL settings use something else, then these will need modification.  You can install both or just the most appropriate set.
 
-	More help on this topic is provided in the IDE.  Help in the IDE might not match exactly the help here.
+	More help on this topic is provided in the IDE.  Help in the IDE might not match exactly the help here.  You do not need to have MySQL running or the HFW database installed to read the IDE help pages.  See Step 3 below.
 
 3. Install the Hoopla Web IDE pages in a local web folder.
 

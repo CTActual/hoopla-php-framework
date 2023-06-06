@@ -25,7 +25,7 @@
 		<div class="sidebar">
           <div class="sidebar_item">
             <h2>Values</h2>
-            <p>Objects can have different values in different contexts.</p>         
+            <p>Objects can have different values on different pages and in different contexts as well as a default value.  Objects actually have a set of values based on the setting type.</p>         
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->  		
 

@@ -8,7 +8,7 @@
 		<div class="sidebar">
           <div class="sidebar_item">
             <h2>Context Type</h2>
-             <p>You will generally want to use Arbitrary. The default context is assigned automatically to regular values.</p>         
+             <p>You will generally want to use Arbitrary or Specific. The default context is assigned automatically to regular values. Changing the targets for Specific contexts can result in odd behavior when assigning values.</p>         
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->
 
@@ -30,6 +30,27 @@
           <div class="sidebar_item">
             <h2>Context Description</h2>
             <p>Add a description for future reference.</p>         
+		  </div><!--close sidebar_item--> 
+        </div><!--close sidebar-->  		
+
+		<div class="sidebar">
+          <div class="sidebar_item">
+            <h2>Specific Page</h2>
+            <p>Assign the context to any object on this page.</p>         
+		  </div><!--close sidebar_item--> 
+        </div><!--close sidebar-->  		
+
+		<div class="sidebar">
+          <div class="sidebar_item">
+            <h2>Specific Object</h2>
+            <p>Assign the context to this object on any page.</p>         
+		  </div><!--close sidebar_item--> 
+        </div><!--close sidebar-->  		
+
+		<div class="sidebar">
+          <div class="sidebar_item">
+            <h2>Specific Page and Object</h2>
+            <p>Assign the context to this object on only this page.</p>         
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->  		
 

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 03, 2022 at 07:37 PM
--- Server version: 8.0.28-0ubuntu0.20.04.3
--- PHP Version: 7.4.3
+-- Generation Time: Jun 05, 2023 at 10:41 PM
+-- Server version: 8.0.33-0ubuntu0.20.04.2
+-- PHP Version: 7.4.3-4ubuntu2.18
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
@@ -27,22 +27,26 @@ CREATE TABLE IF NOT EXISTS ctx (
   ctx_lbl varchar(31) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Label for querying.',
   ctx_dsr varchar(127) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Description of the context.',
   ctx_type_id int UNSIGNED NOT NULL DEFAULT '30' COMMENT 'Context type id.',
+  pg_id int UNSIGNED DEFAULT NULL COMMENT 'Page specific to the context',
+  pg_obj_id int UNSIGNED DEFAULT NULL COMMENT 'Page object specific to the context',
   spc_ord int UNSIGNED DEFAULT NULL COMMENT 'Manually order the entries.',
   act_bit tinyint(1) NOT NULL DEFAULT '1' COMMENT 'True if active.',
   PRIMARY KEY (id),
   UNIQUE KEY ctx_name (ctx_name),
   UNIQUE KEY ctx_lbl (ctx_lbl),
   KEY ctx_type_id (ctx_type_id),
-  KEY spc_ord (spc_ord)
+  KEY spc_ord (spc_ord),
+  KEY pg_id (pg_id),
+  KEY pg_obj_id (pg_obj_id)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Arbitrary contexts to span pages added during project development.';
 
 --
 -- Dumping data for table ctx
 --
 
-INSERT IGNORE INTO ctx (id, ctx_name, ctx_lbl, ctx_dsr, ctx_type_id, spc_ord, act_bit) VALUES
-(1, 'Default Context', 'def_ctx', 'This context is required for use in the settings value table for any non-contextual value as id=1.', 30, 1, 1),
-(2, 'Default Page Context', 'def&lowbar;pg&lowbar;ctx', 'Pages with no special association&period;', 36, 1, 1);
+INSERT IGNORE INTO ctx (id, ctx_name, ctx_lbl, ctx_dsr, ctx_type_id, pg_id, pg_obj_id, spc_ord, act_bit) VALUES
+(1, 'Default Context', 'def_ctx', 'This context is required for use in the settings value table for any non-contextual value as id=1.', 30, NULL, NULL, 1, 1),
+(2, 'Default Page Context', 'def&lowbar;pg&lowbar;ctx', 'Pages with no special association&period;', 36, NULL, NULL, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -474,7 +478,7 @@ CREATE TABLE IF NOT EXISTS `types` (
   UNIQUE KEY unique_name (meta_type_id,type_name(63)),
   KEY meta_type_id (meta_type_id),
   KEY name (type_name(63))
-) ENGINE=MyISAM AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Stores all types except roles, under meta-type' ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Stores all types except roles, under meta-type' ROW_FORMAT=DYNAMIC;
 
 --
 -- Dumping data for table `types`
@@ -506,12 +510,12 @@ INSERT IGNORE INTO `types` (id, spc_ord, type_name, std_type_lbl, type_dsr, meta
 (28, 220, 'External Code', 'ext_code', '3rd Party Code Reference file name or link url.', 2, 1),
 (29, 180, 'Page Query Value', 'pqv', 'Allows one to query pgs with this value.', 1, 1),
 (30, 1, 'Default Context', 'def_ctx', 'The default context for a setting value.', 3, 1),
-(31, 2, 'Arbitrary Context', 'arb_ctx', 'Any alternative context for a setting value.', 3, 1),
+(31, 3, 'Arbitrary Context', 'arb_ctx', 'Any global context for a setting value, accessible to all pages and objects.', 3, 1),
 (32, 70, 'JS Code', 'js_code', 'Javascript code to add to a page.', 2, 1),
 (33, 90, 'JSON String', 'json', 'JSON string to be pulled into the page or sent out.', 2, 1),
 (34, 100, 'CSV List String', 'csv', 'A delimited separated values list string.', 2, 1),
 (35, 110, 'NSV List String', 'nsv', 'A newline separated values list string.', 2, 1),
-(36, 3, 'Page Context', 'pg_ctx', 'Any group of pages, such as those belonging to a template.', 3, 1),
+(36, 2, 'Page Context', 'pg_ctx', 'Any group of pages, such as those belonging to a template.', 3, 1),
 (37, 230, 'Page Detail', 'detail', 'Supplemental page information with a value.', 1, 1),
 (38, 230, 'Detail Value', 'det_val', 'The value of any supplemental detail.', 2, 1),
 (39, 20, 'Page Head', 'head', 'Anything within head tags.', 1, 1),
@@ -530,4 +534,5 @@ INSERT IGNORE INTO `types` (id, spc_ord, type_name, std_type_lbl, type_dsr, meta
 (52, 220, 'Context List', 'ctxlist', 'A list of contexts', 1, 1),
 (53, 200, 'PHP Function Reference', 'php_func_ref', 'A reference to a PCBL object instead of a more direct value.', 2, 1),
 (54, 140, 'Post-Get-Request List', 'postlist', 'The lookup names of any elements of interest returned after submission.', 2, 1),
-(55, 210, 'Object List', 'objlist', 'A list of objects', 1, 1);
+(55, 210, 'Object List', 'objlist', 'A list of objects', 1, 1),
+(56, 4, 'Specific Context', 'spcf_ctx', 'A context that is specific to a page and/or an object.', 3, 1);

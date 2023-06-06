@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -40,10 +40,10 @@ or implied, of Cargotrader, Inc.
 	echo "</fieldset><br>\n";
 
 	echo $aoo('hidden', "name=page;\nvalue=true");
-	//--1-- End of first form
+	//"--1-- End of first form
 	echo "</form>";
 
-//_______________________________________________________________________________________
+//"_______________________________________________________________________________________
 	if (isset($_POST['page']) || isset($_POST['repage']) )
 	{
 		echo $goo('form');		#--2--
@@ -54,61 +54,63 @@ or implied, of Cargotrader, Inc.
 		$sel_ctx_dsr = "";
 		$sel_ctx_lbl = "";
 		$sel_ctx_spc_ord = "";
+		$sel_ctx_pg_id = 0;
+		$sel_ctx_pg_obj_id = 0;
 
-		if (isset($_POST['repage']) && isset($_POST['addnew']) )
+		if (isset($_POST['repage']) )
 		{
 			$post_ctx_spc_ord = (isset($_POST['ctx_spc_ord']) && is_numeric($_POST['ctx_spc_ord']) ) ? $_POST['ctx_spc_ord'] : null;
 			$post_ctx_dsr = (isset($_POST['ctx_dsr']) && !empty($_POST['ctx_dsr']) ) ? $_POST['ctx_dsr'] : null;
-			
-			$ins_value = create_ctx($_POST['ctx_name'], $_POST['ctx_lbl'], $post_ctx_dsr, $post_ctx_spc_ord, $sel_ctx_type_id);
-			} 
-		elseif (isset($_POST['repage']) && isset($_POST['updatectx']) )
-		{
-			$post_ctx_spc_ord = (isset($_POST['ctx_spc_ord']) && is_numeric($_POST['ctx_spc_ord']) ) ? $_POST['ctx_spc_ord'] : null;
-			$post_ctx_dsr = (isset($_POST['ctx_dsr']) && !empty($_POST['ctx_dsr']) ) ? $_POST['ctx_dsr'] : null;
+			$post_ctx_pg_id = (isset($_POST['ctx_pg_id']) && check_index($_POST['ctx_pg_id']) ) ? $_POST['ctx_pg_id'] : null;
+			$post_ctx_pg_obj_id = (isset($_POST['ctx_pg_obj_id']) && check_index($_POST['ctx_pg_obj_id']) ) ? $_POST['ctx_pg_obj_id'] : null;
 
-			$upd_value = update_ctx($_POST['update_ctx_id'], $_POST['ctx_name'], $_POST['ctx_lbl'], $post_ctx_dsr, $post_ctx_spc_ord);
-			}
-		elseif (isset($_POST['repage']) && isset($_POST['activebit']) )
-		{
-			# Go through all the special order boxes to see if anything has changed and make necessary updates
-			if (isset($_POST['spc_ord_hid']) && is_array($_POST['spc_ord_hid']) )
+			if (isset($_POST['addnew']) )
 			{
-				foreach ($_POST['spc_ord_hid'] as $hid_ctx_id=>$hid_ctx_spc_ord)
-				{
-					if ($hid_ctx_spc_ord != 'null')
-					{
-						if (isset($_POST['spc_ord_box'][$hid_ctx_id]) )
-						{
-							if ($_POST['spc_ord_hid'][$hid_ctx_id] != $_POST['spc_ord_box'][$hid_ctx_id]) {$upd_spc_ord = update_ctx_spc_ord($hid_ctx_id, $_POST['spc_ord_box'][$hid_ctx_id]);}
-							}
-						else {$upd_spc_ord = update_ctx_spc_ord($hid_ctx_id);}
-						}	# End of not-null spc_ord
-					elseif (isset($_POST['spc_ord_box'][$hid_ctx_id]) )
-						{$upd_spc_ord = update_ctx_spc_ord($hid_ctx_id, $_POST['spc_ord_box'][$hid_ctx_id]);}
-					}	# End of spc_ord foreach
-				}	# End of isset and is_array check
-
-			# Go through all the active bit boxes to make any necessary updates
-			if (isset($_POST['ctx_act_hid']) &&  is_array($_POST['ctx_act_hid']) )
+				$ins_value = create_ctx($_POST['ctx_name'], $_POST['ctx_lbl'], $post_ctx_dsr, $post_ctx_spc_ord, $sel_ctx_type_id, $post_ctx_pg_id, $post_ctx_pg_obj_id);
+				} 
+			elseif (isset($_POST['updatectx']) )
 			{
-				foreach ($_POST['ctx_act_hid'] as $act_bit_key=>$bit_ctx_id)
-				{
-					if (isset($_POST['ctx_act'][$act_bit_key+1]) && $_POST['ctx_act'][$act_bit_key+1] == $bit_ctx_id)
-						{$upd_act_bit = update_ctx_act_bit($bit_ctx_id);}
-					else
-						{$upd_act_bit = update_ctx_act_bit($bit_ctx_id, false);}
-					}	# End of act_bit foreach
-				}	# End of isset and is_array check
-			}	# End of activebit and spc_ord updates
-
-		if (isset($_POST['repage']) && isset($_POST['edit_ctx']) )
-		{
-			foreach ($_POST['edit_ctx'] as $edit_ctx_key=>$sel_ctx_id)
-			{
-				extract(get_ctx($sel_ctx_id), EXTR_PREFIX_ALL, 'sel');
+				$upd_value = update_ctx($_POST['update_ctx_id'], $_POST['ctx_name'], $_POST['ctx_lbl'], $post_ctx_dsr, $post_ctx_spc_ord, $post_ctx_pg_id, $post_ctx_pg_obj_id);
 				}
-			} # end of repage conditional
+			elseif (isset($_POST['activebit']) )
+			{
+				# Go through all the special order boxes to see if anything has changed and make necessary updates
+				if (isset($_POST['spc_ord_hid']) && is_array($_POST['spc_ord_hid']) )
+				{
+					foreach ($_POST['spc_ord_hid'] as $hid_ctx_id=>$hid_ctx_spc_ord)
+					{
+						if ($hid_ctx_spc_ord != 'null')
+						{
+							if (isset($_POST['spc_ord_box'][$hid_ctx_id]) )
+							{
+								if ($_POST['spc_ord_hid'][$hid_ctx_id] != $_POST['spc_ord_box'][$hid_ctx_id]) {$upd_spc_ord = update_ctx_spc_ord($hid_ctx_id, $_POST['spc_ord_box'][$hid_ctx_id]);}
+								}
+							else {$upd_spc_ord = update_ctx_spc_ord($hid_ctx_id);}
+							}	# End of not-null spc_ord
+						elseif (isset($_POST['spc_ord_box'][$hid_ctx_id]) )
+							{$upd_spc_ord = update_ctx_spc_ord($hid_ctx_id, $_POST['spc_ord_box'][$hid_ctx_id]);}
+						}	# End of spc_ord foreach
+					}	# End of isset and is_array check
+
+				# Go through all the active bit boxes to make any necessary updates
+				if (isset($_POST['ctx_act_hid']) &&  is_array($_POST['ctx_act_hid']) )
+				{
+					foreach ($_POST['ctx_act_hid'] as $act_bit_key=>$bit_ctx_id)
+					{
+						if (isset($_POST['ctx_act'][$act_bit_key+1]) && $_POST['ctx_act'][$act_bit_key+1] == $bit_ctx_id)
+							{$upd_act_bit = update_ctx_act_bit($bit_ctx_id);}
+						else
+							{$upd_act_bit = update_ctx_act_bit($bit_ctx_id, false);}
+						}	# End of act_bit foreach
+					}	# End of isset and is_array check
+				}	# End of activebit and spc_ord updates
+			}	# End of repage
+			
+			if (isset($_POST['edit_ctx']) && check_index($_POST['edit_ctx']) )
+			{
+				$sel_ctx_id = $_POST['edit_ctx'];
+				extract(get_ctx($sel_ctx_id), EXTR_PREFIX_ALL, 'sel');
+				} # end of isset conditional
 
 //__________________________________________________________________________________________
 		// Replace blanks with nulls
@@ -125,17 +127,32 @@ or implied, of Cargotrader, Inc.
 
 		echo "<fieldset><legend>Contexts of Type: $ctx_type_name</legend>\n";
 
+			// We add two cols for Specific contexts
+			$extracols = '';
+			$colspan = 7;
+			
+			if ($sel_ctx_type_id == 56)
+			{
+				$colspan = 9;
+			
+$extracols = <<<COLS
+    <th>For Page</th>
+    <th>For Object</th>
+COLS;
+				}
+			
 $tabletop = <<<TABLETOP
 <table>
 <thead>
 <tr>
-    <th style="text-align:center;" >Context ID</th>
+    <th>Context ID</th>
     <th>Context Name</th>
     <th>Look-Up Label</th>
     <th>Description</th>
-    <th style="text-align:center;" >Special Order</th>
-    <th style="text-align:center;" >Active</th>
-    <th style="text-align:center;" >Edit</th>
+$extracols
+    <th>Special Order</th>
+    <th>Active</th>
+    <th>Edit</th>
 </tr>
 </thead>
 <tbody>
@@ -158,14 +175,26 @@ TABLETOP;
 			$ctx_bit_hid = $aoo('hidden', "name=ctx_act_hid[];\nvalue=$ctx_id");
 			if (isset($sel_ctx_id) && $sel_ctx_id == $ctx_id) {$button_class = "class=button_active";} else {$button_class = "class=button_passive";}
 
-			$edit_button = $aoo('button', "{$button_class};\nname=edit_ctx[];\nvalue=$ctx_id;\nlabel=Select");
+			$edit_button = $aoo('button', "{$button_class};\nname=edit_ctx;\nvalue=$ctx_id;\nlabel=Select");
 
+			// We add two cols for Specific contexts
+			$extracols = '';
+			
+			if ($sel_ctx_type_id == 56)
+			{
+$extracols = <<<COLS
+    <td style="$bc ">$ctx_pg_name</td>\n
+    <td style="$bc ">$ctx_pg_obj_name</td>\n
+COLS;
+				}
+			
 $tabledata = <<<TABLEDATA
 <tr>\n
     <td style="text-align:center;$bc ">$ctx_id</td>\n
     <td style="text-align:center;$bc ">$ctx_name</td>\n
     <td style="text-align:center;$bc ">$ctx_lbl</td>\n
     <td style="$bc ">$ctx_dsr</td>\n
+$extracols
     <td style="text-align:center;$bc ">$ctx_spc_ord_box$ctx_spc_ord_hid</td>\n
     <td style="text-align:center;$bc ">$ctx_bit$ctx_bit_hid</td>\n
     <td style="text-align:center;$bc ">$edit_button</td>\n
@@ -183,7 +212,7 @@ TABLEDATA;
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="text-align:center;$bc " colspan="7">Create Your First $ctx_type_name Below!</td>\n
+    <td style="text-align:center;$bc " colspan="$colspan">Create Your First $ctx_type_name Below!</td>\n
  </tr>\n
 TABLEDATA;
 
@@ -193,30 +222,50 @@ TABLEDATA;
 		echo "</tbody>";
 		echo "</table><br>\n";
 
-		//  Form for adding new role
 		if ($i > 1) {echo $aoo('button', "class=button_passive;\nname=activebit;\nvalue=1;\nlabel=Update Active and Special Order Lists;\naft=<br>");}
 		echo "</fieldset><br>";
 
+//  Form for adding new context________________________________________________________________________________________________________________
 		$ctx_type_name = $aoo('span', "core=$type_name ($sel_ctx_type_id)");
-		$ctx_name_span = $aoo('span', "core=$ctx_name ($sel_ctx_id)");
+		$leg_extra = "";
+		$editing = "";
+		$id_extra = "";
 
 		if (check_index($sel_ctx_id) )
 		{
-			echo "<fieldset><legend>Add/Update Context of Type: $ctx_type_name</legend>";
-
+			$ctx_name_span = $aoo('span', "core=$ctx_name ($sel_ctx_id)");
+			$leg_extra = "/Update";
+			$id_extra = "id=openbox;\n";
 			$editing = "<br><br>Currently editing context $ctx_name_span. (You can still create a new context.)";
 			}
-		else
-		{
-			echo "<fieldset><legend>Add New Context of Type: $ctx_type_name</legend>";
-			$editing = "";
-			}
+			
+		echo $aoo('fieldset', "{$id_extra}legend=Add$leg_extra New Context of Type: $ctx_type_name");
 
 		echo $aoo('textbox', "name=ctx_name;\nsize=50;\nmax=50;\nvalue=$sel_ctx_name;\nlabel=&nbsp;Context Name;\naft=<br>");
 		echo $aoo('textbox', "name=ctx_lbl;\nsize=25;\nmax=25;\nvalue=$sel_ctx_lbl;\nlabel=&nbsp;Context Look-Up Label;\naft=<br>");
 		echo $aoo('textbox', "name=ctx_spc_ord;\nsize=5;\nmax=5;\nvalue=$sel_ctx_spc_ord;\nlabel=&nbsp;Context Special Order (Optional);\naft=<br>");
 		echo $aoo('textarea', "name=ctx_dsr;\nrows=5;\ncols=50;\nvalue=$sel_ctx_dsr;\nlabel=<br>Context Description (Highly Desirable);\naft=<br><br>");
+		
+		// For specific contexts we will show the page and object dropdowns
+		if ($sel_ctx_type_id == 56)
+		{
+			$pg_id_list = create_pg_dropdown();
+			$pg_id_list['pg_id'] = '0__r__' . $pg_id_list['pg_id'];
+			$pg_id_list['pg_dsr'] = 'Any__r__' . $pg_id_list['pg_dsr'];
+			
+			echo $aoo('select', "fore=Specific to Page&nbsp;;\nclass=sel_css;\nname=ctx_pg_id;\ncore={$aoo('option', "value={$pg_id_list['pg_id']};\ntval={$sel_ctx_pg_id};\nlabel={$pg_id_list['pg_dsr']};\nlabelaft=&nbsp;")};\naft=<br><br>");
+			
+			//"
+			$pg_obj_list = get_full_pg_obj_list();
+			$pg_obj_list['obj_id'] = '0__r__' . $pg_obj_list['obj_id'];
+			$pg_obj_list['obj_list_lbl'] = 'Any__r__' . $pg_obj_list['obj_list_lbl'];
+			
+			echo $aoo('select', "fore=Specific to Object&nbsp;;\nclass=sel_css;\nname=ctx_pg_obj_id;\ncore={$aoo('option', "value={$pg_obj_list['obj_id']};\ntval={$sel_ctx_pg_obj_id};\nlabel={$pg_obj_list['obj_list_lbl']};\nlabelaft=&nbsp;")};\naft=<br><br>");
+			
+			//"
+			}
 
+		//"
 		echo $aoo('button', "class=button_passive;\nname=addnew;\nvalue=true;\nlabel=Add Context");
 		if (check_index($sel_ctx_id) ) {echo $aoo('button', "class=button_passive;\nname=updatectx;\nvalue=true;\nlabel=Update Context");}
 		echo $aoo('reset', "class=button_passive");
@@ -228,6 +277,14 @@ TABLEDATA;
 		echo $aoo('hidden', "name=update_ctx_id;\nvalue={$sel_ctx_id}");
 		//--2-- End of form 2
 		echo "</form>";
-		} # End of original post conditional
+		} # End of original page post conditional
 
 ?>
+
+
+<script>
+	var element = document.getElementById("openbox");
+		if (element) {
+	element.scrollIntoView();
+	}
+</script>

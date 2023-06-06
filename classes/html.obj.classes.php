@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2011-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2011-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -29,6 +29,7 @@ or implied, of Cargotrader, Inc.
 
 // page for creating common html objects
 // The 2022 enhancements should be considered in-beta.
+// The first fix in 2023 removed the ";\n" cobble bug due to iteration
 // We've removed some of the restrictions and formatting on attributes, 
 // which might result in unexpected behavior when tag swapping.
 // The goal was to allow making adding more tags and attributes easier through 
@@ -58,6 +59,7 @@ class html_common
 	protected $open = null;
 	protected $remainder = null;
 	protected $for = null;
+	protected $legend = null;
 	protected $pot = null;
 
 	function __construct($con=array() )
@@ -74,11 +76,10 @@ class html_common
 		$outsiders = array('label', 'labelfore', 'labelaft', 'core', 'corefore', 'coreaft', 'altcore', 'fore', 'aft');
 		$abbrs = array('size', 'dis', 'req', 'open', 'ro');
 		$samers = array('autofocus', 'checked', 'disabled', 'formnovalidate', 'multiple', 'novalidate', 'readonly', 'required', 'selected');
+		$legends = array('legend', 'caption');
 
 		foreach ($con as $conkey=>$conval)
 		{
-			$special = "add_$conkey";
-
 			if (in_array($conkey, $insiders) )
 				{$this->$conkey = $this->add_common($conkey, $conval);}
 			elseif (in_array($conkey, $pots) || substr($conkey, 0, 5) === 'data-')
@@ -93,21 +94,23 @@ class html_common
 			elseif ($conkey == 'tab' && !is_array($conval) )
 				{$this->$conkey = $this->add_tab( (int) $conval);}
 			elseif ($conkey == 'uncommon')
-				{$this->remainder = $this->$special($conval);}			
+				{$special = "add_$conkey"; $this->remainder = $this->$special($conval);}			
 			elseif (in_array($conkey, $abbrs) )
-				{$this->$conkey = $this->$special($conval);}			
+				{$special = "add_$conkey"; $this->$conkey = $this->$special($conval);}			
 			elseif (in_array($conkey, $samers) )
 			{
 				$this->$conkey = $this->add_same($conkey, $conval);
 				$this->add_pot($this->$conkey);
 				}
+			elseif (in_array($conkey, $legends) )
+			{$this->$conkey = $this->add_legend($conkey, $conval);}
 			}	# End of foreach
 		}	# End of common function
 
-	public function add_common($attribute, $val)
+	public function add_common($attr=null, $val=null)
 	{
 		if ($this->check_not_blank($val) && !is_array($val) )
-			{return "$attribute=\"$val\" ";}
+			{return "$attr=\"$val\" ";}
 		return null;
 		}
 
@@ -120,12 +123,19 @@ class html_common
 
 	public function add_same($attr=null, $val=null)
 	{
-		if (!is_array($val) && $this->check_tf($val) )
+		if (isset($val) && !is_array($val) && $this->check_tf($val) )
 			{return "$attr ";}
 		return null;
 		}
 
-	public function add_tag($tag)
+	public function add_legend($attr=null, $val=null)
+	{
+		if (isset($val) && !is_array($val) && $this->check_not_blank($val) )
+			{return "<$attr>$val</$attr> ";}
+		return null;
+		}
+
+	public function add_tag($tag=null)
 	{
 		if (!empty($tag) )
 			{return "<$tag ";}
@@ -133,7 +143,7 @@ class html_common
 		return "<input ";
 		}
 
-	public function add_size($size)
+	public function add_size($size=null)
 	{
 		if ($size > 0)
 			{$this->add_pot("size=\"$size\" ");}		
@@ -155,14 +165,14 @@ class html_common
 		$this->add_pot($this->add_same('readonly', $ro) );
 		}
 
-	public function add_open($open)
+	public function add_open($open=null)
 	{
 		if ($this->check_not_blank($open) && !is_array($open) )
 			{return "open=\"true\" ";}
 		return null;
 		}
 
-	public function add_tab($tab)
+	public function add_tab($tab=null)
 	{
 		if ($tab > 0)
 			{return "tabindex=\"$tab\" ";}
@@ -184,7 +194,7 @@ class html_common
 		return $output;
 		}
 
-	public function trim_output($output, $tag)
+	public function trim_output($output=null, $tag=null)
 	{
 		if (trim($output) == "<$tag >") 
 			{return "<$tag>";}
@@ -265,9 +275,7 @@ class generic_obj extends html_common
 
 	public function bow($ins_attrs=null)
 	{
-$output = <<<OUTPUT
-{$this->tag}{$this->type}{$this->name}$ins_attrs{$this->class}{$this->id}{$this->style}{$this->tab}{$this->title}{$this->for}{$this->key}{$this->open}{$this->pot}{$this->remainder}
-OUTPUT;
+		$output = "{$this->tag}{$this->type}{$this->name}$ins_attrs{$this->class}{$this->id}{$this->style}{$this->tab}{$this->title}{$this->for}{$this->key}{$this->open}{$this->pot}{$this->remainder}";
 
 		$this->bow = $output;
 		return null;
@@ -287,17 +295,17 @@ OUTPUT;
 
 	public function cobble()
 	{
-$output = <<<OUTPUT
-{$this->fore}{$this->opening}{$this->corefore}{$this->core}{$this->coreaft}{$this->closing_tag}{$this->label}\n{$this->aft}
-OUTPUT;
+		$output = "{$this->fore}{$this->opening}{$this->legend}{$this->corefore}{$this->core}{$this->coreaft}{$this->closing_tag}{$this->label}";
 
-		return $output;
+		// For historical reasons, the original parser used ';\n', which means $output can create an artificial ';\n' if it ends with a ';'
+		if (!empty($output) && $output[-1] !== ';') {return $output . "\n" . $this->aft;} else {return $output . $this->aft;}
 		}
 
 	// The first parameter will add any additional attributes to the tag
 	public function gen($ins_attrs=null, $trim=true)
 	{
 		$this->bow($ins_attrs);
+		
 		if ($trim) {$this->trim_bow();} else {$this->close_bow();}
 
 		return $this->cobble();
@@ -538,17 +546,13 @@ class div_obj extends generic_obj
 		return null;
 		}
 
+	// We allow the div or extended classes to remain open with the 'noclose' tag in $con
+	// As long as there is no core, or if no core then we can supply the closing tag.
 	public function start($con=array() )
 	{
 		$con['tag'] = $this->objtag;
 		$this->closing_tag = (!array_key_exists('noclose', $con) && ( (array_key_exists('core', $con) && $this->check_not_blank($con['core']) ) || (array_key_exists('close', $con) && $this->check_not_blank($con['close']) ) ) ) ? "</{$this->objtag}>" : null;
 		$this->common($con);
-		return null;
-		}
-
-	public function add_close()
-	{
-		$this->output = $this->output . "</{$this->objtag}>\n{$this->aft}";
 		return null;
 		}
 	}	# End of div_obj class
@@ -602,6 +606,18 @@ class code_obj extends div_obj
 	}	# End of code_obj class
 
 // ____________________________________________________________________________________________________
+class mark_obj extends div_obj
+{
+	public $objtag = "mark";
+
+	function __construct($con=array() )
+	{
+		parent::__construct($con);
+		return null;
+		}
+	}	# End of mark_obj class
+
+// ____________________________________________________________________________________________________
 class form_obj extends div_obj
 {
 	public $objtag = "form";
@@ -627,22 +643,13 @@ class fieldset_obj extends div_obj
 	{
 		$this->start($con);
 
-		// We offer the option to use caption or legend for con.
-		$legend = (array_key_exists('legend', $con) && $this->check_not_blank($con['legend']) ) ? $this->add_legend($con['legend']): null;
-		$legend = (empty($legend) && array_key_exists('caption', $con) && $this->check_not_blank($con['caption']) ) ? $this->add_legend($con['caption']) : $legend;
-		$this->core = $legend . $this->core;
-
+		// We offer the option to use caption or legend for con, swapping caption for legend if necessary.
+		if (!array_key_exists('legend', $con) && array_key_exists('caption', $con) && $this->check_not_blank($con['caption']) )
+			{$con['legend'] = $con['caption']; unset($con['caption']);}
+		elseif (array_key_exists('caption', $con) && $this->check_not_blank($con['caption']) )
+			{unset($con['caption']);}
+			
 		$this->output = $this->gen();
-		return null;
-		}
-
-	public function add_legend($legend=null)
-	{
-		if ($this->check_not_blank($legend) )
-		{
-			return "<legend>$legend</legend>\n";
-			}
-
 		return null;
 		}
 	}	# End of fieldset_obj class
@@ -1321,6 +1328,12 @@ class table_obj extends generic_obj
 	{
 		$this->start($con);
 
+		// We offer the option to use caption or legend for con, swapping legend for caption if necessary.
+		if (!array_key_exists('caption', $con) && array_key_exists('legend', $con) && $this->check_not_blank($con['legend']) )
+			{$con['caption'] = $con['legend']; unset($con['legend']);}
+		elseif (array_key_exists('legend', $con) && $this->check_not_blank($con['legend']) )
+			{unset($con['legend']);}
+			
 		$border = (array_key_exists('border', $con) ) ? $this->add_common('border', $con['border']) : null;
 		$frame = (array_key_exists('frame', $con) ) ? $this->add_common('frame', $con['frame']) : null;
 		$width = (array_key_exists('width', $con) ) ? $this->add_common('width', $con['width']) : null;
@@ -1328,19 +1341,9 @@ class table_obj extends generic_obj
 		$cellspacing = (array_key_exists('cellspacing', $con) ) ? $this->add_common('cellspacing', $con['cellspacing']) : null;
 		$rules = (array_key_exists('rules', $con) ) ? $this->add_common('rules', $con['rules']) : null;
 
-		$caption = (array_key_exists('caption', $con) ) ? $this->add_caption($con['caption']) : null;
-		$this->core = $caption . $this->core;
-
 		$this->output = $this->gen("{$border}$frame{$width}{$cellpadding}{$cellspacing}$rules");
 		return null;
 		} # End of construct function
-
-	public function add_caption($caption)
-	{
-		if ($this->check_not_blank($caption) && !is_array($caption) )
-			{return "<caption>$caption</caption>\n";}
-		return null;
-		}
 	}	# End of table_obj class
 
 // ____________________________________________________________________________________________________
@@ -1428,6 +1431,18 @@ class caption_obj extends td_obj
 	}	# End of caption_obj class
 
 // ____________________________________________________________________________________________________
+class legend_obj extends td_obj
+{
+	public $objtag = "legend";
+
+	function __construct($con=array() )
+	{
+		parent::__construct($con);
+		return null;
+		} # End of construct function
+	}	# End of legend_obj class
+
+// ____________________________________________________________________________________________________
 class array_common extends generic_obj
 {
 	public function find_tval($value=null, $tval=null, $dval=null)
@@ -1485,22 +1500,18 @@ class array_common extends generic_obj
 			}
 			
 		// We need to remove fore and aft if they are in $flat
-		if (isset($flat['fore']) )
-		{
-			unset($flat['fore']);
-			}
+		if (isset($flat['fore']) ) {unset($flat['fore']);}
 		
-		if (isset($flat['aft']) )
-		{
-			unset($flat['aft']);
-			}
+		if (isset($flat['aft']) ) {unset($flat['aft']);}
 		
 		// There might be the case of only one row, everything flat
 		if (count($mult) > 0)
 		{
-			// We need to assume the $mult keys have the same count size
-			// We can combine them into single elem arrays
-			// We get the keys of $mult
+			// We need to assume the $mult keys have the same count size.
+			// We can combine them into single elem arrays.
+			// We get the keys of $mult with array_keys.
+			// We then get the first value of $mult_keys ($first_key) with array_shift, 
+			// Which also shrinks the list by one.
 			$mult_keys = array_keys($mult);
 			$first_key = array_shift($mult_keys);
 			
@@ -1624,14 +1635,24 @@ class option_obj extends array_common
 		// We now rely on the handle array function
 		
 		// We pull out fore and aft first
-		if (isset($con['fore']) )
-		{
-			unset($con['fore']);
-			}
+		if (isset($con['fore']) ) {unset($con['fore']);}
 		
-		if (isset($con['aft']) )
+		if (isset($con['aft']) ) {unset($con['aft']);}
+		
+		// We steal the marklist and mark since it will probably be a subset of the total list
+		$marklist = array();
+		$mark = "&bull;&nbsp;";
+		
+		if (isset($con['marklist']) ) 
 		{
-			unset($con['aft']);
+			$marklist = $con['marklist'];
+			unset($con['marklist']);
+			}
+
+		if (isset($con['mark']) ) 
+		{
+			$mark = $con['mark'];
+			unset($con['mark']);
 			}
 
 		// We need to swap label, labelfore and labelaft with core, corefore and coreaft since that is the newer syntax for the option tag and other tags
@@ -1643,27 +1664,40 @@ class option_obj extends array_common
 		unset($con['labelfore']);
 		unset($con['labelaft']);
 
+		// handle_array takes con and makes an array of objects
 		$obj_set = $this->handle_array($con, null, false);
-		
+
+		$conkey = 'selected';
+
 		foreach ($obj_set as $key=>$obj)
 		{
+			// We deal with the marklist.  We can use find_tval to return true or false.
+			// To make the mark blank, refrain from using marklist or set mark blank, as for example, mark=;\nmarklist=$blah
+			if (!empty($marklist) )
+			{
+				if ($this->find_tval($obj['value'], $marklist) )
+					{$obj['corefore'] = (isset($obj['corefore']) ) ? $mark . $obj['corefore'] : $mark;}
+				}
+			
 			$this->start($obj);
 
 			// If the tval is the selected or 'true' value, the dval is the default selected value
 			$tval = (array_key_exists('tval', $obj) && $this->check_not_blank($obj['tval']) ) ? $obj['tval'] : null;
 			$dval = (array_key_exists('dval', $obj) && $this->check_not_blank($obj['dval']) ) ? $obj['dval'] : null;
 
-			$conkey = 'selected';
-
 			// In theory, since $tval and $dval can be arrays, multi selects should work.
+			// For single values, find_tval will return true or false.
+			// So, if the object is not already marked by 'selected' then it will mark it selected with true.
 			if (!isset($obj[$conkey]) )
-			{
-				$this->add_pot($this->add_same($conkey, $this->find_tval($obj['value'], $tval, $dval) ) );
-				}
-			
+				{$this->add_pot($this->add_same($conkey, $this->find_tval($obj['value'], $tval, $dval) ) );}
+				
 			$this->output .= $this->gen();
 			$this->pot = null;
-			}
+			unset($obj['corefore']);
+			$this->corefore = null;
+			}	# End of foreach
+		unset($obj_set);
+		unset($con);
 		}	# End of construct function
 	}	# End of option_obj class
 
@@ -1763,11 +1797,12 @@ class null_obj extends generic_obj
 		// This allows us to switch between active and passive elements with just a change in the tag, ignoring all other active settings.
 		// This turns an object "off"
 
-$output = <<<OUTPUT
-{$this->fore}\n{$this->aft}
-OUTPUT;
+		# We need to make sure $this->fore does not end with a ';'
+		$fore = $this->fore;
+		
+		if (!empty($fore) && $fore[-1] !== ';') {$f = $fore . "\n";} else {$f = $fore;}
 
-		return $output;
+		return "$f{$this->aft}";
 		}
 	}	# End of null_obj class
 
@@ -1794,11 +1829,12 @@ class comment_obj extends html_common
 
 	public function gen()
 	{
-$output = <<<OUTPUT
-{$this->fore}\n{$this->open_tag}{$this->core}{$this->close_tag}\n{$this->aft}
-OUTPUT;
-
-		return $output;
+		# We need to make sure $this->fore does not end with a ';'
+		$fore = $this->fore;
+		
+		if (!empty($fore) && $fore[-1] !== ';') {$f = $fore . "\n" . $this->open_tag;} else {$f = $fore . $this->open_tag;}
+		
+		return "$f{$this->core}{$this->close_tag}\n{$this->aft}";
 		}
 	}	# End of comment obj class
 
@@ -1864,26 +1900,26 @@ function gen_obj_array($obj_array=array(), $type=null)
 	return $output;
 	}	# End of gen_obj_array
 // ____________________________________________________________________________________________________
-function automatic_object_output($type=null, $innerstr=null)
+function automatic_object_output($type=null, $innerstr=null, $alt=";\n")
 {
 	if (empty($type) ) {$type = 'generic';}
 
-	return gen_obj_output($type, setup_con($innerstr) );
+	return gen_obj_output($type, setup_con($innerstr, $alt) );
 	}	# End of automatic_object_output
 // ____________________________________________________________________________________________________
-function automatic_obj_array($type=null, $obj_array=array() )
+function automatic_obj_array($type=null, $obj_array=array(), $alt=";\n")
 {
 	$output = '';
 
 	if (empty($type) )
 	{
 		foreach ($obj_array as $key=>$val)
-			{$output .= gen_obj_output($val[0], setup_con($val[1]) );}
+			{$output .= gen_obj_output($val[0], setup_con($val[1], $alt) );}
 		}
 	else
 	{
 		foreach ($obj_array as $key=>$val)
-			{$output .= gen_obj_output($type, setup_con($val) );}
+			{$output .= gen_obj_output($type, setup_con($val, $alt) );}
 		}
 
 	return $output;
@@ -2016,8 +2052,8 @@ function strip_html($input=null, $tag_list=null)
 			$input = str_replace(array("<{$tag}>", "</{$tag}>"), array("{$tag}<br>", "&sol;{$tag}<br>"), $input);
 			}
 		}
-	else
-		{return $input;}
+
+	return $input;
 	}
 	
 // ____________________________________________________________________________________________________

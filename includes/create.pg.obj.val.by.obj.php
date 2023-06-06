@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -31,7 +31,7 @@ or implied, of Cargotrader, Inc.
 
 	$pg_obj_list = get_full_pg_obj_list();
 
-	echo "<fieldset><legend>Page Objects (ID)</legend>";
+	echo "<fieldset><legend>Page Objects (ID)</legend>\n";
 
 	// Display all the object types.
 	if (isset($pg_obj_list['obj_id']) && !empty($pg_obj_list['obj_id']) )
@@ -40,6 +40,7 @@ or implied, of Cargotrader, Inc.
 		
 		echo $aoo('select', "class=sel_css;\nname=obj_list;\ncore={$aoo('option', "value={$pg_obj_list['obj_id']};\ntval={$obj_list_pos};\nlabel={$pg_obj_list['obj_list_lbl']};\nlabelaft=&nbsp;")};\nonchange=clickB()");
 
+		//"
 		echo $aoo('button', "class=button_passive;\nname=selobj;\nvalue=1;\nlabel=Select Object;\nid=seltype");
 		}
 	else
@@ -47,11 +48,11 @@ or implied, of Cargotrader, Inc.
 		echo $aoo('div', "class=divback;\ncore=<br>You Need to Create at Least One Page Object First! {$aoo('link', "style=font-weight: bold; font-style:italic;;\nhref=hoopla.fw.create.pg.objs.php;\ncore=Create Objects")}<br>&nbsp;");
 		}
 
-	echo "</fieldset><br>\n";
+	echo "</fieldset>\n<br>\n";
 
 	echo $aoo('hidden', "name=page;\nvalue=true");
-	//--1-- End of the first form
-	echo "</form>";
+	//--1-- "End of the first form
+	echo "</form>\n";
 
 //__________________________________________________________________________________________________________
 	if (isset($_POST['page']) || isset($_POST['repage']) )
@@ -111,16 +112,18 @@ or implied, of Cargotrader, Inc.
 		{
 			include($sharedpath . 'upd.set.val.php');
 			}
+		clean_up_null_vals();
 		}	# End of page-repage conditional
 //__________________________________________________________________________________________________________
-	if (isset($_POST['page']) || isset($_POST['repage']) )
+	// "Display values
+	if ( (isset($_POST['page']) || isset($_POST['repage']) ) && isset($_POST['obj_list']) && check_index($_POST['obj_list']) )
 	{
 		// Get the pages associated with the given object
 		$obj_pg_list = get_obj_pg_list($_POST['obj_list']);
 
 		$sel_obj = sel_pg_obj($_POST['obj_list']);
 
-		echo $aoo('form', "action=#type");	#--2--
+		echo $aoo('form');	#--2--
 
 		// Get the selected object type
 		$sel_obj_name = $aoo('span', "core={$sel_obj['sel_obj_name']} ({$_POST['obj_list']}) &mdash; {$sel_obj['sel_obj_dsr']}");
@@ -190,6 +193,9 @@ TABLETOP;
 				$upd_obj_id = (check_index($_POST['obj_list']) ) ? $_POST['obj_list'] : null;
 
 				include ($sharedpath . 'upd.sets.php');
+				
+				// Need to check if there were any updates on default values
+				$def_vals = chk_for_def_vals($_POST['obj_list']);
 				}	# End of updating new or edited values
 
 			// Get the existing object values
@@ -197,17 +203,17 @@ TABLETOP;
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="text-align:center; $bc " id="$pg_id" >&nbsp;$enabled&nbsp;</td>\n
-    <td style="text-align:center; $bc ">$pg_id{$pg_id_hid}</td>\n
-    <td style="text-align:center; $bc ">$pg_name_div</td>\n
-    <td style="$bc ">$pg_dsr</td>\n
-    <td style="$bc ">$pg_acs_str</td>\n
-    <td style="text-align:center; $bc ">$pg_obj_id</td>\n
-    <td style="text-align:center; $bc ">$spc_ord_tb</td>\n
-    <td style="text-align:center; $bc ">$loc_tb</td>\n
-    <td style="text-align:center; $bc ">$use_def_obj&nbsp;</td>\n
-    <td style="text-align:center; $bc ">$act_obj</td>\n
-    <td style="text-align:center; $bc ">$select</td>\n
+    <td style="text-align:center; $bc" id="$pg_id" >&nbsp;$enabled&nbsp;</td>\n
+    <td style="text-align:center; $bc">$pg_id{$pg_id_hid}</td>\n
+    <td style="text-align:center; $bc">$pg_name_div</td>\n
+    <td style="$bc">$pg_dsr</td>\n
+    <td style="$bc">$pg_acs_str</td>\n
+    <td style="text-align:center; $bc">$pg_obj_id</td>\n
+    <td style="text-align:center; $bc">$spc_ord_tb</td>\n
+    <td style="text-align:center; $bc">$loc_tb</td>\n
+    <td style="text-align:center; $bc">$use_def_obj&nbsp;</td>\n
+    <td style="text-align:center; $bc">$act_obj</td>\n
+    <td style="text-align:center; $bc">$select</td>\n
  </tr>\n
 TABLEDATA;
 
@@ -225,7 +231,7 @@ TABLEDATA;
 		{
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="text-align:center;$bc " colspan="$colspan">Oops!  We cannot find any pages assigned to this object!</td>\n
+    <td style="text-align:center; $bc" colspan="$colspan">Oops!  We cannot find any pages assigned to this object!</td>\n
  </tr>\n
 TABLEDATA;
 
@@ -244,81 +250,71 @@ TABLEDATA;
 			echo $aoo('button', "class=button_passive;\nname=savesettings;\nvalue=true;\nlabel=Update Settings;\nfore=<br>\n");
 			echo $aoo('reset', "class=button_passive");
 			}
-		echo "</fieldset><br>\n";
+			
+		echo "</fieldset>\n<br>\n";
 
 		echo $aoo('hidden', "name=repage;\nvalue=true");
 		echo $aoo('hidden', "name=obj_list;\nvalue={$_POST['obj_list']}");
 		echo $aoo('hidden', "name=obj_list_cnt;\nvalue=$i");
 
 		//--2-- End of the second form
-		echo "</form>";
+		echo "</form>\n";
 
 		// Select object setting type as filter____________________________________________________________
-		echo $aoo('form');	#--3--
-
-		if (isset($_POST['repage']) && $_POST['repage'] == 'true' && isset($_POST['sel_pg']) )
+		if (isset($_POST['repage']) && $_POST['repage'] == 'true' && isset($_POST['sel_pg']) && isset($_POST['obj_list']) && check_index($_POST['obj_list']) )
 		{
-			// Get the page object setting type values
-			$set_type_list = list_pg_obj_set_types($sel_obj['sel_pg_obj_type_id']);
-
 			// Get the selected page
 			if (isset($_POST['sel_pg']) && count($_POST['sel_pg']) == 1)
 				{$pg_id = current($_POST['sel_pg']); $sel_pg_key = key($_POST['sel_pg']);}
 
+			$sel_obj_name_span = $sel_obj_name;
+
+			$_POST['settype'] = 'true';
+
+			// use the $sel_obj_id
+			$sel_obj_id = $_POST['obj_list'];
+		
 			$sel_pg = get_pg_info($pg_id);
 			$sel_pg_name = $sel_pg['sel_obj_name'];
-
-			# if there is only one setting type in use we default to that, unless the user selects a new one.
-			$set_type_count = det_num_of_set_types_per_obj($_POST['obj_list'], $pg_id);
-			$use_def_bit = det_use_def_bit($_POST['obj_list'], $pg_id);
+			$sel_pg_obj_type_id = $sel_obj['sel_pg_obj_type_id'];
 			
-			if ( ($set_type_count == 1 || $def_val_count == 1) && !isset($_POST['settype']) )
-			{
-				// Get the existing object values
-				$pg_obj_vals = get_vals_by_pg_and_obj($pg_id, $_POST['obj_list']);
-				$_POST['settype'] = 'true';
-
-				// Get the setting type of the selected object
-				if ($set_type_count == 1) {$_POST['obj_sets'] = $pg_obj_vals[0]['val_pg_obj_set_type_id'];}
-				else {$_POST['obj_sets'] = $def_vals[0]['def_type_id'];}
-				}
-
-			echo "<fieldset id=type><legend>Select the Setting Type for the Object: $sel_obj_name</legend>\n";
-			$post_obj_sets = (isset($_POST) && isset($_POST['obj_sets']) ) ? $_POST['obj_sets'] : null;
-			echo $aoo('select', "class=sel_css;\nname=obj_sets;\ncore={$aoo('option', "value={$set_type_list['pg_obj_set_type_id']};\ntval={$post_obj_sets};\nlabel={$set_type_list['set_type_list']};\nlabelaft=&nbsp;")};\nonchange=clickAny('settingtype')");
-
-			echo $aoo('button', "class=button_passive;\nname=settype;\nvalue=true;\nlabel=Select Type;\nid=settingtype");
-			echo "</fieldset><br>";
-
+			include($sharedpath . 'obj.set.type.form.php');
+			
 			echo $aoo('hidden', "name=form3;\nvalue=true");
 			echo $aoo('hidden', "name=repage;\nvalue=true");
 			echo $aoo('hidden', "name=sel_pg[$sel_pg_key];\nvalue=$pg_id");
-			echo $aoo('hidden', "name=obj_list;\nvalue={$_POST['obj_list']}");
+			echo $aoo('hidden', "name=obj_list;\nvalue={$sel_obj_id}");
 
-			//--4-- End of the form
-			echo "</form>";
-			}
+			//--3-- End of the form
+			echo "</form>\n";
 
-		$sel_pg_name = (isset($sel_pg_name) ) ? $aoo('span', "core=$sel_pg_name") : null;
-		$sel_obj_id = $_POST['obj_list'];
+			$sel_pg_name = (isset($sel_pg_name) ) ? $aoo('span', "core=$sel_pg_name") : null;
 
-		// Deal with new object values________________________________________________________________
-		if ( (isset($_POST['settype']) && $_POST['settype'] == 'true') || (isset($_POST['objvals']) && $_POST['objvals'] == 'true') )
-		{
-			echo $aoo('form', "action=#$pg_id");	#--4--
+			// "Display/Add/Update object values________________________________________________________________
+			if ( (isset($post_obj_sets) && check_index($post_obj_sets) ) && ( (isset($_POST['settype']) && $_POST['settype'] == 'true') || (isset($_POST['objvals']) && $_POST['objvals'] == 'true') ) )
+			{
+				echo $aoo('form');	#--4--
 
-			include ($sharedpath . 'obj.vals.php');
+				include ($sharedpath . 'obj.vals.php');
 
-			echo $aoo('hidden', "name=form4;\nvalue=true");
-			echo $aoo('hidden', "name=repage;\nvalue=true");
-			echo $aoo('hidden', "name=sel_pg[$sel_pg_key];\nvalue=$pg_id");
-			echo $aoo('hidden', "name=obj_list;\nvalue={$_POST['obj_list']}");
-			echo $aoo('hidden', "name=obj_i;\nvalue=$i");
-			echo $aoo('hidden', "name=obj_sets;\nvalue={$_POST['obj_sets']}");
+				echo $aoo('hidden', "name=form4;\nvalue=true");
+				echo $aoo('hidden', "name=repage;\nvalue=true");
+				echo $aoo('hidden', "name=sel_pg[$sel_pg_key];\nvalue=$pg_id");
+				echo $aoo('hidden', "name=obj_list;\nvalue={$sel_obj_id}");
+				echo $aoo('hidden', "name=obj_i;\nvalue=$i");
+				echo $aoo('hidden', "name=obj_sets;\nvalue={$post_obj_sets}");
 
-			//--4-- End of the form
-			echo "</form>";
-			}
+				//--4-- End of the form
+				echo "</form>\n";
+				}	# End of Display/Add/Update object values
+			} # End of repage
 		} # End of original post conditional
 
 ?>
+
+<script>
+	var element = document.getElementById("openbox");
+		if (element) {
+	element.scrollIntoView();
+	}
+</script>

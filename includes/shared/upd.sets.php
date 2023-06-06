@@ -35,10 +35,12 @@ or implied, of Cargotrader, Inc.
 
 					if (isset($_POST['ctx_hid'][$k]) && isset($_POST['obj_sets']) )
 					{
+						// Update page specific values
 						$type_lbl = 'pg_';
 
 						include ($sharedpath . 'evaluate.entries.php');
 
+						// Update default (any page) values
 						$type_lbl = 'def_';
 						$upd_pg_id = null;
 
