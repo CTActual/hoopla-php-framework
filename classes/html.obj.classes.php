@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2011-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2011-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -69,10 +69,11 @@ class html_common
 
 	public function common($con=array() )
 	{
-		$this->tag = (array_key_exists('tag', $con) ) ? $this->add_tag($con['tag']) : "<input ";
+		$this->tag = (isset($con['tag']) ) ? $this->add_tag($con['tag']) : "<input ";
+		unset($con['tag']);
 
 		$insiders = array('type', 'name', 'class', 'id', 'style', 'title', 'for');
-		$pots = array('value', 'class', 'max', 'min', 'form', 'maxlength', 'high', 'low', 'optimum', 'src', 'alt', 'colspan', 'rowspan', 'align', 'valign', 'height', 'width', 'shape', 'href', 'cite', 'target', 'enctype', 'placeholder', 'accesskey', 'click', 'oninput', 'onclick', 'onchange', 'onselect', 'onmousedown', 'onmouseover', 'onkeydown', 'onkeypress', 'onkeyup', 'draggable', 'dropzone', 'role', 'step');
+		$pots = array('value', 'class', 'max', 'min', 'form', 'maxlength', 'high', 'low', 'lang', 'optimum', 'src', 'alt', 'colspan', 'rowspan', 'align', 'valign', 'height', 'width', 'shape', 'href', 'cite', 'target', 'enctype', 'placeholder', 'accesskey', 'click', 'oninput', 'onclick', 'onchange', 'onselect', 'onmousedown', 'onmouseover', 'onkeydown', 'onkeypress', 'onkeyup', 'draggable', 'dropzone', 'role', 'step');
 		$outsiders = array('label', 'labelfore', 'labelaft', 'core', 'corefore', 'coreaft', 'altcore', 'fore', 'aft');
 		$abbrs = array('size', 'dis', 'req', 'open', 'ro');
 		$samers = array('autofocus', 'checked', 'disabled', 'formnovalidate', 'multiple', 'novalidate', 'readonly', 'required', 'selected');
@@ -82,13 +83,13 @@ class html_common
 		{
 			if (in_array($conkey, $insiders) )
 				{$this->$conkey = $this->add_common($conkey, $conval);}
-			elseif (in_array($conkey, $pots) || substr($conkey, 0, 5) === 'data-')
+			elseif ($conkey == 'ecore' || $conkey == 'altecore')
+				{$this->core = $this->add_simple(ecore_object_output($conval) );}
+			elseif (in_array($conkey, $pots) || substr($conkey, 0, 5) === 'data-' || substr($conkey, 0, 5) === 'aria-')
 			{
 				$this->$conkey = $this->add_common($conkey, $conval);
 				$this->add_pot($this->$conkey);
 				}
-			elseif ($conkey == 'key')
-				{$this->key = $this->add_common('accesskey', $conval);}
 			elseif (in_array($conkey, $outsiders) )
 				{$this->$conkey = $this->add_simple($conval);}
 			elseif ($conkey == 'tab' && !is_array($conval) )
@@ -103,7 +104,9 @@ class html_common
 				$this->add_pot($this->$conkey);
 				}
 			elseif (in_array($conkey, $legends) )
-			{$this->$conkey = $this->add_legend($conkey, $conval);}
+				{$this->$conkey = $this->add_legend($conkey, $conval);}
+			elseif ($conkey == 'key')
+				{$this->key = $this->add_common('accesskey', $conval);}
 			}	# End of foreach
 		}	# End of common function
 
@@ -241,7 +244,7 @@ class generic_obj extends html_common
 
 	function __construct($con=array() )
 	{
-		$this->objtag = (array_key_exists('tag', $con) ) ? $con['tag'] : 'div';
+		$this->objtag = (isset($con['tag']) ) ? $con['tag'] : 'div';
 		$this->path($con);
 		return null;
 		} # End of construct function
@@ -367,6 +370,18 @@ class q_obj extends generic_obj
 	}	# End of q_obj class
 
 // ____________________________________________________________________________________________________
+class i_obj extends generic_obj
+{
+	public $objtag = "i";
+
+	function __construct($con=array() )
+	{
+		$this->path($con);
+		return null;
+		} # End of construct function
+	}	# End of i_obj class
+
+// ____________________________________________________________________________________________________
 class li_obj extends generic_obj
 {
 	public $objtag = "li";
@@ -484,7 +499,7 @@ class h4_obj extends generic_obj
 		$this->path($con);
 		return null;
 		} # End of construct function
-	}	# End of h3_obj class
+	}	# End of h4_obj class
 
 // ____________________________________________________________________________________________________
 class h5_obj extends generic_obj
@@ -496,7 +511,7 @@ class h5_obj extends generic_obj
 		$this->path($con);
 		return null;
 		} # End of construct function
-	}	# End of h3_obj class
+	}	# End of h5_obj class
 
 // ____________________________________________________________________________________________________
 class nav_obj extends generic_obj
@@ -508,7 +523,7 @@ class nav_obj extends generic_obj
 		$this->path($con);
 		return null;
 		} # End of construct function
-	}	# End of h3_obj class
+	}	# End of nav_obj class
 
 // ____________________________________________________________________________________________________
 class header_obj extends generic_obj
@@ -520,7 +535,7 @@ class header_obj extends generic_obj
 		$this->path($con);
 		return null;
 		} # End of construct function
-	}	# End of h3_obj class
+	}	# End of header_obj class
 
 // ____________________________________________________________________________________________________
 class footer_obj extends generic_obj
@@ -532,7 +547,7 @@ class footer_obj extends generic_obj
 		$this->path($con);
 		return null;
 		} # End of construct function
-	}	# End of h3_obj class
+	}	# End of footer_obj class
 
 // ____________________________________________________________________________________________________
 class div_obj extends generic_obj
@@ -546,13 +561,19 @@ class div_obj extends generic_obj
 		return null;
 		}
 
-	// We allow the div or extended classes to remain open with the 'noclose' tag in $con
-	// As long as there is no core, or if no core then we can supply the closing tag.
+	// Normally, a div or extended classes shall close automatically if the core tag is not blank.
+	// Likewise, a blank core tag in $con will keep the div or extended classes open as in <div>...
+	// We allow the div or extended classes to remain open with the 'noclose' tag in $con, even if core is not blank.
+	// If desired, an empty core div or extended classes can be forced to close with the close tag in $con.
 	public function start($con=array() )
 	{
 		$con['tag'] = $this->objtag;
-		$this->closing_tag = (!array_key_exists('noclose', $con) && ( (array_key_exists('core', $con) && $this->check_not_blank($con['core']) ) || (array_key_exists('close', $con) && $this->check_not_blank($con['close']) ) ) ) ? "</{$this->objtag}>" : null;
 		$this->common($con);
+		$this->closing_tag = "</{$this->objtag}>";
+		
+		if ( ($this->core === Null && !isset($con['close']) ) || ($this->core !== Null && isset($con['noclose']) ) )
+			{$this->closing_tag = null;}
+		
 		return null;
 		}
 	}	# End of div_obj class
@@ -618,6 +639,18 @@ class mark_obj extends div_obj
 	}	# End of mark_obj class
 
 // ____________________________________________________________________________________________________
+class picture_obj extends div_obj
+{
+	public $objtag = "picture";
+
+	function __construct($con=array() )
+	{
+		parent::__construct($con);
+		return null;
+		}
+	}	# End of mark_obj class
+
+// ____________________________________________________________________________________________________
 class form_obj extends div_obj
 {
 	public $objtag = "form";
@@ -626,8 +659,9 @@ class form_obj extends div_obj
 	{
 		$this->start($con);
 
-		$action = (is_array($con) && array_key_exists('action', $con) ) ? $this->add_common('action', $con['action']) : 'action="" ';
-		$method = (is_array($con) && array_key_exists('method', $con) ) ? $this->add_common('method', $con['method']) : 'method="post" ';
+		// We set non-null default values for action and method to allow for easy shorthand form, as in $aoo('form')
+		$action = (isset($con['action']) ) ? $this->add_common('action', $con['action']) : 'action="" ';
+		$method = (isset($con['method']) ) ? $this->add_common('method', $con['method']) : 'method="post" ';
 
 		$this->output = $this->gen("$action{$method}");
 		return null;
@@ -641,14 +675,15 @@ class fieldset_obj extends div_obj
 
 	function __construct($con=array() )
 	{
-		$this->start($con);
-
-		// We offer the option to use caption or legend for con, swapping caption for legend if necessary.
-		if (!array_key_exists('legend', $con) && array_key_exists('caption', $con) && $this->check_not_blank($con['caption']) )
+		// We offer the option to use caption or legend for con, swapping caption for legend if not there.
+		// Otherwise, we remove any caption entry.
+		if (!isset($con['legend']) && isset($con['caption']) && $this->check_not_blank($con['caption']) )
 			{$con['legend'] = $con['caption']; unset($con['caption']);}
-		elseif (array_key_exists('caption', $con) && $this->check_not_blank($con['caption']) )
+		elseif (isset($con['caption']) )
 			{unset($con['caption']);}
 			
+		$this->start($con);
+
 		$this->output = $this->gen();
 		return null;
 		}
@@ -664,7 +699,7 @@ class optgroup_obj extends div_obj
 		$this->start($con);
 
 		// Non-standard use of label must be dealt with
-		$label = (array_key_exists('label', $con) ) ? $this->add_common('label', $con['label']) : null;
+		$label = (isset($con['label']) ) ? $this->add_common('label', $con['label']) : null;
 		$this->label = null;
 
 		$this->output = $this->gen($label);
@@ -704,7 +739,8 @@ class textarea_obj extends generic_obj
 	function __construct($con=array() )
 	{
 		// We need to swap value with core to have the newer syntax work
-		if (isset($con['value']) && !isset($con['core']) ) {$con['core'] = $con['value'];}
+		// ecore would explicitly be called, so we don't worry about that case (mistaking 'value' for 'ecore').
+		if (isset($con['value']) && !isset($con['core']) && !isset($con['ecore']) ) {$con['core'] = $con['value'];}
 		unset($con['value']);
 		
 		$cols = (isset($con['cols']) ) ? $this->add_sizing('cols', (int) $con['cols']) : null;
@@ -718,9 +754,9 @@ class textarea_obj extends generic_obj
 		return null;
 		}
 
-	public function add_sizing($dir, $val)
+	public function add_sizing($dir=null, $val=null)
 	{
-		if ($val > 0)
+		if (check_index($val) )
 			{return "$dir=\"$val\" ";}		
 		return null;
 		}
@@ -746,7 +782,7 @@ class number_obj extends generic_obj
 	function __construct($con=array() )
 	{
 		// We will start with the dval if forced to, though the number then can't be blank
-		if ( (!isset($con['value']) || empty($con['value']) ) && isset($con['dval']) && !empty($con['dval']) )
+		if ( (!isset($con['value']) || !$this->check_not_blank($con['value']) ) && isset($con['dval']) && $this->check_not_blank($con['dval']) )
 			{$con['value'] = $con['dval'];}
 			
 		$this->way($con);
@@ -833,7 +869,7 @@ class tel_obj extends generic_obj
 
 	function __construct($con=array() )
 	{
-		if (array_key_exists('pattern', $con) && isset($con['pattern']) )
+		if (isset($con['pattern']) && isset($con['pattern']) )
 		{
 			$con['uncommon']['pattern'] = $con['pattern'];
 			}
@@ -868,6 +904,21 @@ class url_obj extends generic_obj
 	}	# End of url_obj class
 
 // ____________________________________________________________________________________________________
+class hr_obj extends generic_obj
+{
+	public $objtype = 'hr';
+
+	function __construct($con=array() )
+	{
+		$con['tag'] = $this->objtype;
+		$this->closing_tag = null;
+		$this->common($con);
+		$this->output = $this->gen(null, false);
+		return null;
+		}
+	}	# End of hr_obj class
+
+// ____________________________________________________________________________________________________
 class output_obj extends generic_obj
 {
 	public $objtype = 'output';
@@ -877,7 +928,7 @@ class output_obj extends generic_obj
 		$this->way($con);
 		return null;
 		}
-	}	# End of hidden_obj class
+	}	# End of output_obj class
 
 // ____________________________________________________________________________________________________
 class input_button_obj extends generic_obj
@@ -904,14 +955,14 @@ class cb_obj extends generic_obj
 		// There can only be assumed to be one value, however.
 		// For radio buttons we must assume that dval and tval are singular element arrays
 		
-		$val = (array_key_exists('value', $con) && $con['value'] !== NULL && $con['value'] !== '') ? $con['value'] : false;
-		$dval = (array_key_exists('dval', $con) && !is_array($con['dval']) && $con['dval'] !== NULL && $con['dval'] !== '') ? explode(',,', $con['dval']) : ( (isset($con['dval']) && is_array($con['dval']) ) ? $con['dval'] : false);
-		$tval = (array_key_exists('tval', $con) && !is_array($con['tval']) && $con['tval'] !== NULL && $con['tval'] !== '') ? explode(',,', $con['tval']) : ( (isset($con['tval']) && is_array($con['tval']) ) ? $con['tval'] : false);
+		$val = (isset($con['value']) && $con['value'] !== '') ? $con['value'] : false;
+		$dval = (isset($con['dval']) && !is_array($con['dval']) && $con['dval'] !== '') ? explode(',,', $con['dval']) : ( (isset($con['dval']) && is_array($con['dval']) ) ? $con['dval'] : false);
+		$tval = (isset($con['tval']) && !is_array($con['tval']) && $con['tval'] !== '') ? explode(',,', $con['tval']) : ( (isset($con['tval']) && is_array($con['tval']) ) ? $con['tval'] : false);
 
 		if ($this->objtype == 'radio')
 		{
-			$dval = array($dval[0]);
-			$tval = array($tval[0]);
+			$dval = (is_array($dval) && isset($dval[0]) ) ? array($dval[0]) : $dval;
+			$tval = (is_array($tval) && isset($tval[0]) ) ? array($tval[0]) : $tval;
 			}
 			
 		// This sets up a priority for deciding if tval (or the returned true value) shall apply.
@@ -930,14 +981,14 @@ class cb_obj extends generic_obj
 		if ($val !== false && $tval !== false && in_array($val, $tval) ) {$tf = $this->add_same($c, 1);}
 		elseif ($val !== false && $tval !== false && !in_array($val, $tval) ) {$tf = null;}
 		elseif ($val !== false && $dval !== false && in_array($val, $dval) ) {$tf = $this->add_same($c, 1);}
-		elseif (array_key_exists('tf', $con) && $con['tf'] !== NULL && $con['tf'] !== '') {$tf = $this->add_same($c, $con['tf']);}
-		elseif (array_key_exists('dtf', $con) ) {$tf = $this->add_same($c, $con['dtf']);}
+		elseif (isset($con['tf']) && $con['tf'] !== '') {$tf = $this->add_same($c, $con['tf']);}
+		elseif (isset($con['dtf']) ) {$tf = $this->add_same($c, $con['dtf']);}
 		else {$tf = null;}
-
-		$this->label = (array_key_exists('label', $con) ) ? $this->add_simple($this->labelfore . $this->label . $this->labelaft) : null;
 
 		$this->init($con);
 		
+		$this->label = (isset($con['label']) ) ? $this->add_simple($this->labelfore . $this->label . $this->labelaft) : null;
+
 		$this->output = $this->gen("$tf", false);
 		return null;
 		}
@@ -1011,7 +1062,7 @@ class canvas_obj extends generic_obj
 
 	function __construct($con=array() )
 	{
-		$alt = (array_key_exists('alt', $con) ) ? $con['core'] = $con['alt'] : null;
+		$alt = (isset($con['alt']) ) ? $con['core'] = $con['alt'] : null;
 		unset($con['alt']);
 		
 		$this->start($con);
@@ -1071,7 +1122,7 @@ class file_obj extends generic_obj
 	{
 		$this->init($con);
 
-		$accept = (array_key_exists('accept', $con) ) ? $this->add_common('accept', $con['accept']) : null;
+		$accept = (isset($con['accept']) ) ? $this->add_common('accept', $con['accept']) : null;
 
 		$this->output = $this->gen("$accept", false);
 		return null;
@@ -1086,12 +1137,12 @@ class button_obj extends generic_obj
 	function __construct($con=array() )
 	{
 		// Default button type is 'submit'
-		if (!array_key_exists('type', $con) ) {$con['type'] = 'submit';}
+		if (!isset($con['type']) ) {$con['type'] = 'submit';}
 
 		$this->start($con);
 
 		// Non-standard use of label must be dealt with
-		$this->core = (array_key_exists('label', $con) ) ? $con['label'] : $this->core;
+		$this->core = (isset($con['label']) ) ? $con['label'] : $this->core;
 		$this->label = null;
 
 		$this->output = $this->gen(null, false);
@@ -1111,7 +1162,7 @@ class reset_obj extends generic_obj
 		$this->start($con);
 
 		// Non-standard use of label must be dealt with
-		$this->core = (array_key_exists('label', $con) ) ? $con['label'] : ( (!empty($this->core) ) ? $this->core : "Reset");
+		$this->core = (isset($con['label']) ) ? $con['label'] : ( ($this->core !== Null) ? $this->core : "Reset");
 		$this->label = null;
 
 		$this->output = $this->gen(null, false);
@@ -1141,7 +1192,7 @@ class email_obj extends generic_obj
 		$this->way($con);
 		return null;
 		}
-	}	# End of clear_obj class
+	}	# End of email_obj class
 
 // ____________________________________________________________________________________________________
 // The following class is for "a" links, not HTML include files that use a "<link" tag, see below for other options
@@ -1153,10 +1204,10 @@ class link_obj extends generic_obj
 	{
 		$this->start($con);
 
-		$newpg = (array_key_exists('newpg', $con) ) ? "target=\"_blank\" " : null;
+		$newpg = (isset($con['newpg']) || isset($con['blank'])  ) ? "target=\"_blank\" " : null;
 
 		// We need to account for the deprecated use of 'label'
-		if (empty($this->core) && !empty($this->label) ) {$this->core = $this->label; $this->label = null;}
+		if ($this->core === NULL && $this->label !== NULL) {$this->core = $this->label; $this->label = null;}
 
 		$this->output = $this->gen($newpg, false);
 		return null;
@@ -1199,14 +1250,28 @@ class inc_obj extends generic_obj
 	{
 		$this->init($con);
 
+		$media = (isset($con['media']) ) ? $this->add_common('media', $con['media']) : null;
+		
 		// We default to stylesheet or use 'css' to make it easier
-		if (!array_key_exists('rel', $con) || $con['rel'] == 'css') {$con['rel'] == 'stylesheet';}
+		if (!isset($con['rel']) || $con['rel'] == 'css') {$con['rel'] == 'stylesheet';}
 		$rel = $this->add_common('rel', $con['rel']);
 
-		$this->output = $this->gen($rel, false);
+		$this->output = $this->gen("$rel$media", false);
 		return null;
 		}	# End of construct function
 	}	# End of inc_obj class
+
+// ____________________________________________________________________________________________________
+class address_obj extends generic_obj
+{
+	public $objtag = "address";
+
+	function __construct($con=array() )
+	{
+		$this->path($con);
+		return null;
+		}	# End of construct function
+	}	# End of address_obj class
 
 // ____________________________________________________________________________________________________
 // This is for html5 blockquotes
@@ -1232,7 +1297,7 @@ class bq extends blockquote_obj
 		parent::__construct($con);
 		return null;
 		}	# End of construct function
-	}	# End of bl_obj class
+	}	# End of bq_obj class
 
 // ____________________________________________________________________________________________________
 class img_obj extends generic_obj
@@ -1249,6 +1314,25 @@ class img_obj extends generic_obj
 	}	# End of img_obj class
 
 // ____________________________________________________________________________________________________
+class source_obj extends generic_obj
+{
+	public $objtag = "source";
+
+	function __construct($con=array() )
+	{
+		$con['tag'] = $this->objtag;
+		
+		$this->init($con);
+
+		$media = (isset($con['media']) ) ? $this->add_common('media', $con['media']) : null;
+		$srcset = (isset($con['srcset']) ) ? $this->add_common('srcset', $con['srcset']) : null;
+		
+		$this->output = $this->gen("$media$srcset", false);
+		return null;
+		}	# End of construct function
+	}	# End of img_obj class
+
+// ____________________________________________________________________________________________________
 class meta_obj extends generic_obj
 {
 	public $objtag = "meta";
@@ -1258,13 +1342,14 @@ class meta_obj extends generic_obj
 		$con['tag'] = $this->objtag;
 		$this->init($con);
 
-		$charset = (array_key_exists('charset', $con) ) ? $this->add_common('charset', $con['charset']) : null;
+		$charset = (isset($con['charset']) ) ? $this->add_common('charset', $con['charset']) : null;
+		$property = (isset($con['property']) ) ? $this->add_common('property', $con['property']) : null;
 		// We shorten http-equiv to 'he' for convenience.
-		$httpequiv = (array_key_exists('he', $con) ) ? $this->add_common('http-equiv', $con['he']) : null;
+		$httpequiv = (isset($con['he']) ) ? $this->add_common('http-equiv', $con['he']) : null;
 		// We'll accept value for content
-		$content = (array_key_exists('content', $con) ) ? $this->add_common('content', $con['content']) : ( (array_key_exists('value', $con) ) ? $this->add_common('content', $con['value']) : null);
+		$content = (isset($con['content']) ) ? $this->add_common('content', $con['content']) : ( (isset($con['value']) ) ? $this->add_common('content', $con['value']) : null);
 
-		$this->output = $this->gen("$charset{$httpequiv}{$content}", false);
+		$this->output = $this->gen("$property$charset{$httpequiv}{$content}", false);
 		return null;
 		}	# End of construct function
 	}	# End of meta_obj class
@@ -1290,10 +1375,10 @@ class iframe_obj extends generic_obj
 	{
 		$this->start($con);
 
-		if(empty($con['frameborder']) ) {$con['frameborder'] = 0;}
+		if (!isset($con['frameborder']) || $con['frameborder'] === NULL) {$con['frameborder'] = 0;}
 		$frameborder = $this->add_common('frameborder', $con['frameborder']);
-		$scrolling = (array_key_exists('scrolling', $con) ) ? $this->add_common('scrolling', $con['scrolling']) : null;
-		if(!empty($con['fullscreen']) ) {$fullscreen = "webkitAllowFullScreen allowFullScreen";} else {$fullscreen = null;}
+		$scrolling = (isset($con['scrolling']) ) ? $this->add_common('scrolling', $con['scrolling']) : null;
+		if (!empty($con['fullscreen']) ) {$fullscreen = "webkitAllowFullScreen allowFullScreen";} else {$fullscreen = null;}
 
 		$this->output = $this->gen("{$frameborder}{$scrolling}{$fullscreen}", false);
 		return null;
@@ -1309,10 +1394,10 @@ class audio_obj extends generic_obj
 	{
 		$this->start($con);
 
-		$preload = (array_key_exists('preload', $con) && !empty($con['preload']) ) ? 'preload="' . $con['preload'] . '" ' : null;
-		$autoplay = (array_key_exists('autoplay', $con) && !empty($con['autoplay']) ) ? 'autoplay="autoplay" ' : null;
-		$controls = (array_key_exists('controls', $con) && !empty($con['controls']) ) ? 'controls="controls" ' : null;
-		$loop = (array_key_exists('loop', $con) && !empty($con['loop']) ) ? 'loop="loop" ' : null;
+		$preload = (isset($con['preload']) ) ? 'preload="' . $con['preload'] . '" ' : null;
+		$autoplay = (isset($con['autoplay']) ) ? 'autoplay="autoplay" ' : null;
+		$controls = (isset($con['controls']) ) ? 'controls="controls" ' : null;
+		$loop = (isset($con['loop']) ) ? 'loop="loop" ' : null;
 
 		$this->output = $this->gen("{$preload}{$autoplay}$controls{$loop}", false);
 		return null;
@@ -1326,20 +1411,21 @@ class table_obj extends generic_obj
 
 	function __construct($con=array() )
 	{
-		$this->start($con);
-
-		// We offer the option to use caption or legend for con, swapping legend for caption if necessary.
-		if (!array_key_exists('caption', $con) && array_key_exists('legend', $con) && $this->check_not_blank($con['legend']) )
+		// We offer the option to use caption or legend for con, swapping legend for caption if caption is not set.
+		// We unset legend if caption is set.
+		if (!isset($con['caption']) && isset($con['legend']) && $this->check_not_blank($con['legend']) )
 			{$con['caption'] = $con['legend']; unset($con['legend']);}
-		elseif (array_key_exists('legend', $con) && $this->check_not_blank($con['legend']) )
+		elseif (isset($con['legend']) )
 			{unset($con['legend']);}
 			
-		$border = (array_key_exists('border', $con) ) ? $this->add_common('border', $con['border']) : null;
-		$frame = (array_key_exists('frame', $con) ) ? $this->add_common('frame', $con['frame']) : null;
-		$width = (array_key_exists('width', $con) ) ? $this->add_common('width', $con['width']) : null;
-		$cellpadding = (array_key_exists('cellpadding', $con) ) ? $this->add_common('cellpadding', $con['cellpadding']) : null;
-		$cellspacing = (array_key_exists('cellspacing', $con) ) ? $this->add_common('cellspacing', $con['cellspacing']) : null;
-		$rules = (array_key_exists('rules', $con) ) ? $this->add_common('rules', $con['rules']) : null;
+		$this->start($con);
+
+		$border = (isset($con['border']) ) ? $this->add_common('border', $con['border']) : null;
+		$frame = (isset($con['frame']) ) ? $this->add_common('frame', $con['frame']) : null;
+		$width = (isset($con['width']) ) ? $this->add_common('width', $con['width']) : null;
+		$cellpadding = (isset($con['cellpadding']) ) ? $this->add_common('cellpadding', $con['cellpadding']) : null;
+		$cellspacing = (isset($con['cellspacing']) ) ? $this->add_common('cellspacing', $con['cellspacing']) : null;
+		$rules = (isset($con['rules']) ) ? $this->add_common('rules', $con['rules']) : null;
 
 		$this->output = $this->gen("{$border}$frame{$width}{$cellpadding}{$cellspacing}$rules");
 		return null;
@@ -1656,7 +1742,8 @@ class option_obj extends array_common
 			}
 
 		// We need to swap label, labelfore and labelaft with core, corefore and coreaft since that is the newer syntax for the option tag and other tags
-		if (isset($con['label']) && !isset($con['core']) ) {$con['core'] = $con['label'];}
+		// It doesn't make much sense to use ecore here, but we account for it.
+		if (isset($con['label']) && !isset($con['core']) && !isset($con['ecore']) ) {$con['core'] = $con['label'];}
 		if (isset($con['labelfore']) && !isset($con['corefore']) ) {$con['corefore'] = $con['labelfore'];}
 		if (isset($con['labelaft']) && !isset($con['coreaft']) ) {$con['coreaft'] = $con['labelaft'];}
 		
@@ -1682,8 +1769,8 @@ class option_obj extends array_common
 			$this->start($obj);
 
 			// If the tval is the selected or 'true' value, the dval is the default selected value
-			$tval = (array_key_exists('tval', $obj) && $this->check_not_blank($obj['tval']) ) ? $obj['tval'] : null;
-			$dval = (array_key_exists('dval', $obj) && $this->check_not_blank($obj['dval']) ) ? $obj['dval'] : null;
+			$tval = (isset($obj['tval']) && $this->check_not_blank($obj['tval']) ) ? $obj['tval'] : null;
+			$dval = (isset($obj['dval']) && $this->check_not_blank($obj['dval']) ) ? $obj['dval'] : null;
 
 			// In theory, since $tval and $dval can be arrays, multi selects should work.
 			// For single values, find_tval will return true or false.
@@ -1711,7 +1798,7 @@ class tag_obj extends generic_obj
 		// We can create any generic_obj tag missing from the master list above
 		if (is_array($con) )
 		{
-			if (array_key_exists('tagtype', $con) )
+			if (isset($con['tagtype']) )
 			{
 				$this->objtag = $con['tagtype'];
 				$this->path($con);
@@ -1734,7 +1821,7 @@ class string_obj extends generic_obj
 	{
 		// This allows us to switch between active and passive elements with just a change in the tag, ignoring all other active settings.
 		// Core and Value are preserved as a string to be echoed, along with the fore and aft values.
-		$value = (array_key_exists('value', $con) ) ? $con['value'] : null;
+		$value = (isset($con['value']) ) ? $con['value'] : null;
 
 $output = <<<OUTPUT
 {$this->fore}{$this->core}{$value}{$this->aft}
@@ -1762,7 +1849,7 @@ class truefalse_obj extends generic_obj
 		
 		if (is_array($con) )
 		{
-			if (array_key_exists('tf', $con) )
+			if (isset($con['tf']) )
 			{
 				if ($con['tf'] == 1)
 				{
@@ -1843,7 +1930,7 @@ class comment_obj extends html_common
 // ____________________________________________________________________________________________________
 function setup_con($instr, $alt=";\n")
 {
-	$instr = str_replace(array('&', ',', "__r__$alt"), array('__and__', '__comma__', $alt), $instr);
+	$instr = str_replace(array('&', "__r__$alt"), array('__and__', $alt), $instr);
 	
 	parse_str(str_replace($alt, '&', $instr), $con);
 
@@ -1865,13 +1952,14 @@ function setup_con_with_remainders($str1=null, $str2=null)
 // ____________________________________________________________________________________________________
 function gen_obj_output($type='generic', $con=array() )
 {
+	$output = null;
 	$type = $type . '_obj';
 
-	$obj = new $type($con);
-
-	$output = str_replace('__comma__', ',', $obj->output);
-	$output = str_replace('__and__', '&', $output);
-
+	$obj = (class_exists($type) ) ? new $type($con) : null;
+	
+	if ($obj !== null && is_object($obj) )
+		{$output = str_replace('__and__', '&', $obj->output);}
+	
 	unset($obj);
 
 	return $output;
@@ -1951,7 +2039,7 @@ function exploded_object_output($str=null, $split='||', $alt=';\n')
 	if (empty($str) || empty($split) ) {return null;}
 	
 	extract(handle_e_string($str, $split, $alt) );
-	
+
 	return gen_obj_output($type, setup_con($innerstr, $alt) );
 	}	# End of exploded_object_output
 // ____________________________________________________________________________________________________
@@ -1991,6 +2079,44 @@ function exploded_str_rep_get_type_and_con($str=null, $just_type=false, $replace
 	
 	return array('type'=>$type, 'con'=>setup_con($is, $alt) );
 	}	# End of exploded_str_rep_get_type_and_con
+// ____________________________________________________________________________________________________
+function ecore_object_output($str=null)
+{
+	// Here we explicitly set the first character as the object field value delimiter unless a ';', 
+	// in which case we use the first 3 characters, which is safer and backwards compatible.
+	// Double that value is the object delimiter, as in {$obj1}delim{$obj2}delim{$obj3}.
+	// Do not double the first character at the beginning of the string, only between objects.
+	// And the first delimited value as the type for sending to eoo.
+	// We assume the single character delimiter is something unusual in unicode.
+	// The ecore and/or altecore of an object is sent to this function call.
+	// This means that you do not have to quote the ecore value or call a first order function.
+	// To parse this iteratively, each ecore and/or altecore level must use a different delimiter.
+	if (!empty($str) )
+	{
+		$split = mb_substr($str, 0, 1, "UTF-8");
+		$rem = mb_substr($str, 1, null, "UTF-8");
+		
+		if ($split === ';')
+		{
+			$split = mb_substr($str, 0, 3, "UTF-8");
+			$rem = mb_substr($str, 3, null, "UTF-8");
+			}
+		
+		if (!empty($rem) )
+		{
+			$objs = explode("$split$split", $rem);
+			
+			$output = null;
+			
+			foreach ($objs as $obj)
+				{$output .= exploded_object_output($obj, $split, $split);}
+				
+			return $output;
+			}
+		}
+	return null;
+	}
+	
 // ____________________________________________________________________________________________________
 //											Misc. Functions
 // ____________________________________________________________________________________________________
@@ -2038,21 +2164,66 @@ function html_entity_decodes($input)
 // ____________________________________________________________________________________________________
 function html_entity_decodes_iso($input)
 {
-	return utf8_encode(html_entity_decode($input, ENT_NOQUOTES | ENT_HTML5, 'ISO-8859-1') );
+	// If you need re-encode into UTF-8 From ISO-8859-1
+	return mb_convert_encoding(html_entity_decode($input, ENT_NOQUOTES | ENT_HTML5, 'ISO-8859-1'), 'UTF-8', 'ISO-8859-1');
 	}
 
 // ____________________________________________________________________________________________________
-function strip_html($input=null, $tag_list=null)
+function strip_html($input=null, $tag_list=null, $start=false)
+{
+	$start = force_boolean($start, false);
+	
+	// Swap out the tags in the tag_list array
+	if (isset($tag_list) && is_array($tag_list) && count($tag_list) > 0)
+	{
+		if ($start)
+		{
+			foreach ($tag_list as $t=>$tag)
+			{
+				$input = str_ireplace("<{$tag}", "&lt;{$tag}", $input);
+				}
+			}
+		else
+		{
+			foreach ($tag_list as $t=>$tag)
+			{
+				$input = str_ireplace(	array("<?", "?>", "/>", "&quot;>", "<{$tag}>", "</{$tag}>", " [", " Array", "  "), 
+												array("&lt;?", "?&gt;", "&sol;&gt;", "&quot;&gt;", "&lt;{$tag}&gt;", "&lt;&sol;{$tag}&gt;<br>", "<br>[", "<br>Array", " "), $input);
+				}
+			}
+		}
+
+	return $input;
+	}
+	
+// ____________________________________________________________________________________________________
+function del_html($input=null, $tag_list=null)
 {
 	// Remove the tags in the tag_list array
 	if (isset($tag_list) && is_array($tag_list) && count($tag_list) > 0)
 	{
 		foreach ($tag_list as $t=>$tag)
 		{
-			$input = str_replace(array("<{$tag}>", "</{$tag}>"), array("{$tag}<br>", "&sol;{$tag}<br>"), $input);
+			$input = str_ireplace(array("\n", "&NewL", "<{$tag}>", "</{$tag}>"), array_fill(0, 4, ""), $input);
 			}
 		}
 
+	return $input;
+	}
+	
+// ____________________________________________________________________________________________________
+function html_table_row_swap($input=null)
+{
+	// Replace table rows with <div> and <span> tags
+	$input = str_ireplace(array("<tr>", "</tr>"), array("<div style=\"display:table-row;\">", "</div>\n"), $input);
+
+	$input = str_ireplace(array("<th>", "</th>"), array("<span style=\"display:table-cell;\">", "</span>"), $input);
+
+	$input = str_ireplace(array("<td>", "</td>"), array("<span style=\"display:table-cell;\">", "</span>"), $input);
+	
+	if (substr($input, -7) == "</span>") {$input .= "</div>";}
+	elseif (substr($input, -8) == "</span>&") {$input .= "</div>";}
+	
 	return $input;
 	}
 	
@@ -2079,6 +2250,106 @@ function pc_next_permutation($p, $size) {
 
     return $p;
 }
+
+// ____________________________________________________________________________________________________
+// Borrowed from Symphony/polyfill-php72
+/*
+ * Copyright (c) 2015-2019 Fabien Potencier
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+// This is a work-around for the deprecated utf8_decode function
+// Convert utf8 to iso8859_1
+function utf8_decode_new(string $string): string 
+{
+	$s = (string) $string;
+	$len = strlen($s);
+
+	for ($i = 0, $j = 0; $i < $len; ++$i, ++$j) 
+	{
+		switch ($s[$i] & "\xF0") 
+		{
+			case "\xC0":
+			case "\xD0":
+			$c = (ord($s[$i] & "\x1F") << 6) | ord($s[++$i] & "\x3F");
+			$s[$j] = $c < 256 ? \chr($c) : '?';
+			break;
+
+			case "\xF0":
+			++$i;
+			// no break
+
+			case "\xE0":
+			$s[$j] = '?';
+			$i += 2;
+			break;
+
+			default:
+			$s[$j] = $s[$i];
+			}
+		}
+
+	return substr($s, 0, $j);
+	}
+
+// ____________________________________________________________________________________________________
+// Borrowed from Symphony/polyfill-php72
+/*
+ * Copyright (c) 2015-2019 Fabien Potencier
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+// This is a work-around for the deprecated utf8_encode function
+// Convert iso8859_1 to utf8
+function utf8_encode_new(string $s): string 
+{
+	$s .= $s;
+	$len = strlen($s);
+
+	for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) 
+	{
+		switch (true) 
+		{
+			case $s[$i] < "\x80": $s[$j] = $s[$i]; break;
+			case $s[$i] < "\xC0": $s[$j] = "\xC2"; $s[++$j] = $s[$i]; break;
+			default: $s[$j] = "\xC3"; $s[++$j] = chr(ord($s[$i]) - 64); break;
+			}
+		}
+
+	return substr($s, 0, $j);
+	}
 
 // ____________________________________________________________________________________________________
 function keyword_regex($input)
@@ -2233,6 +2504,7 @@ function check_key($a=array(), $k=null)
 	$epoo = 'exploded_printed_object_output';
 	$esroo = 'exploded_str_rep_object_output';
 	$esrgtac = 'exploded_str_rep_get_type_and_con';
+	$ecoo = 'ecore_object_output';
 	$ps = 'prepstr';
 	$ps2 = 'prepstr2';
 	$mbps = 'mb_prepstr';

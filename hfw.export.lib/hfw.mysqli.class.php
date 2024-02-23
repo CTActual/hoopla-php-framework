@@ -1,7 +1,7 @@
 <?php
 
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -78,23 +78,36 @@ class hfw_mysqli_obj
 
 	function __construct($user_type=null, $local=false)
 	{
+		global $extclasspath;
+
 		$this->mysqli_start_time = microtime(true);
 		$this->mysqli_con_fo = new mysqli();
 		$this->mysqli_con_fo->init();
-		$this->mysqli_classpath = $GLOBALS['extclasspath'];
+		$this->mysqli_classpath = $extclasspath;
 
 		if ($local) {$this->mysqli_local = true;}
 
-		include ($this->mysqli_classpath . "hfw.db.info.php");
+		if (file_exists("{$extclasspath}hfw.db.info.php") ) {include ("{$extclasspath}hfw.db.info.php");}
 
-		$this->mysqli_con_bool = true;
+		$this->mysqli_con_bool = false;
 
-		$this->mysqli_con_fo->real_connect($dsn['hostspec'], $dsn['username'], $dsn['password'], $dsn['database'], $dsn['port'], $dsn['socket']);
-
-		if (mysqli_connect_error() )
+		// We check that $classpath actually found a file and created $dsn
+		if (isset($dsn) && is_array($dsn) ) 
 		{
-			$this->mysqli_con_bool = false;
-			$this->mysqli_con_err= $this->mysqli_con_fo->error;
+			$this->mysqli_con_fo->real_connect($dsn['hostspec'], $dsn['username'], $dsn['password'], $dsn['database'], $dsn['port'], $dsn['socket'], $dsn['flags']);
+
+			$this->mysqli_con_bool = true;
+			
+			if (mysqli_connect_error() )
+			{
+				$this->mysqli_con_bool = false;
+				$this->mysqli_con_err= $this->mysqli_con_fo->error;
+				$this->report();
+				}
+			}
+		else
+		{
+			$this->mysqli_con_err = "Ext HFW Classpath Failure, Connection Info File hfw.db.info.php Not Found.";
 			$this->report();
 			}
 
@@ -348,7 +361,9 @@ class hfw_mysqli_obj
 		// This is an obscure use case, but needed for backwards compatibility
 		if ($this->mysqli_local == false)
 		{
-			$GLOBALS = $GLOBALS + $this->mysqli_col;
+			// This is an old feature for backwards compat
+			foreach ($this->mysqli_col as $mckey=>$mcval)
+				{$GLOBALS[$mckey] = $mcval;}
 			$this->mysqli_col = array();
 			}
 
@@ -689,7 +704,7 @@ function hfw_tcol_pattern($query=null, $i=null, $input=null, $output=null)
 	}
 
 //_______________________________________________________________________________________
-// Standard insert query
+// Standard insert or update query
 function hfw_ins_pattern($query=null, $i=null, $input=null, $output='mysqli_insert_id')
 {
 	$value = array();

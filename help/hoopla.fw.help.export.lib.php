@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@ or implied, of Cargotrader, Inc.
 
 require_once('hoopla.fw.rel.path.php');
 
-include($classpath . "html.obj.classes.php");
+require_once($incpath . 'common.incs.php');
 
 ?>
 
@@ -57,7 +57,8 @@ include($classpath . "html.obj.classes.php");
 	<div id="site_content">		
 	
 <?php
-	include($sidepath . "std.sidebar.php");
+	include($sidepath . "std.sidebar.top.php");
+	include($sidepath . "std.sidebar.bot.php");
 ?>
 
 	  <div id="content">
@@ -125,10 +126,11 @@ include($classpath . "html.obj.classes.php");
 			<li class="li_inner">&nbsp;</li>
 			<li>OUTPUT: Returns the string value of the object in situ, an error message, no value as null, or multiple values in an array if not enough information was given.</li>
 			<li class="li_inner">If an array is returned you will likely get an error in your template PHP unless you put in handling for it, but more than likely fixing the call will be better.</li>
-			<li class="li_inner">The output array is <b>array[0 ... N]['val'=><i>the in situ value</i>, 'type'=><i>the setting type id</i>, 'pg'=><i>the page id</i>]</b></li>
+			<li class="li_inner">The output array is <b>array[0 ... N]['val'=><i>the in situ value</i>, 'type'=><i>the setting type id</i>, 'pg'=><i>the page id</i>, 'ctx_id'=><i>the context id</i>]</b></li>
 			<li class="li_inner">Only one context can be returned since a context is required, even if only the default context.</li>
 			<li class="li_inner">The page value generally overrides the default value if it exists, unless the default value is specifically requested with $def.</li>
 			<li class="li_inner">While text values are easier to deal with on a template, there is no checking to see if they make any sense.  If not, no value is returned.  For example, if there is no page with the URL Tag <i>index</i> then no value will be returned.  The function does not return an error warning that there is no page with that tag.</li>
+			<li class="li_inner">The output logic for this call was revised in 2024 to favor specific calls over default values and make use of the new <b>use_def_ctx_bit</b> field in <b>pg_pg_obj_brg</b>.  This may change output behavior and require some refactoring of older code.</li>
 		</ul>
 		
 		<h3>&starf;hfwn_return_value</h3>
@@ -155,6 +157,18 @@ include($classpath . "html.obj.classes.php");
 		
 		<p>A similar function, <i>hfwn_csv_return_value</i>, or its first class alias <i>$csvhfwnrv</i>&#8212;note the use of <b>n</b> in the name&#8212;can be used when text entries are desired.  The general help for that is the same as for $hfwnrv, except the parameters are a csv string in the same order.  Note that you cannot pass variables in a fixed string, it must be interpreted first.</p>
 
+		<ul>
+			<li>INPUT: (<b>$csv</b>=null, <b>$alt</b>=&apos;,&apos;, <b>$new_set_type</b>=null)</li>
+			<li class="li_inner"><b>$csv</b>	<i>required</i> (CSV string of $hfwnrv input params.  The inputs for $hfwnrv are ($pagenum=null, $location=null, $named_ctx=null, $named_type=null, $def=false) )</li>
+			<li class="li_inner"><b>$alt</b>	<i>not required</i>, <i><b>default value=&apos;,&apos;</b></i> (string delimiter alternative)</li>
+			<li class="li_inner"><b>$new_set_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (change out the csv string namted setting type with this named setting type.)</li>
+			<li class="li_inner">&nbsp;</li>
+			<li>Typical INPUT example: <b>$csvhfwnrv(&apos;index,loc1,def_ctx,csv&apos;)</b>, call $hfwnrv(&apos;index&apos;, &apos;loc1&apos;, &apos;def_ctx&apos;, &apos;csv&apos;).</li>
+			<li>Possible INPUT example: <b>$csvhfwnrv(&apos;index|loc1|def_ctx|csv&apos;, &apos;|&apos;, &apos;txt&apos;)</b>, call $hfwnrv(&apos;index&apos;, &apos;loc1&apos;, &apos;def_ctx&apos;, &apos;txt&apos;), using &apos;|&apos; as the string delimiter instead of &apos;,&apos; and replacing setting type &apos;csv&apos; with &apos;txt&apos;.</li>
+			<li class="li_inner">&nbsp;</li>
+			<li>OUTPUT: The output is the same as for <i>$hfwrv</i>.</li>
+		</ul>
+		
 		<p><i>hfw_return_value</i>, <i>hfwn_return_value</i> and <i>hfwn_csv_return_value</i> all rely on a simple master PHP class in the library called <i>hoopla_get_obj_val</i>.  This class can be called directly, but it is not recommended.  This would only be done if some low level processing is needed on the template.  The class does provide more detailed output, such as some error messages, and the entire output array.  However, this will probably be of limited help.</p>
 
 <!-- hfw_return_all_vals -->
@@ -170,9 +184,9 @@ include($classpath . "html.obj.classes.php");
 			<li class="li_inner"><b>$named_ctx</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the text alias name for a context, though the default context is assumed so only use if another context is needed)</li>
 			<li class="li_inner"><b>$named_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the text setting type name alias to be used instead of the id integer&#8212;see <b>$type</b>&#8212;and only important if more than one setting type exists for an object)</li>
 			<li class="li_inner">&nbsp;</li>
-			<li>Typical INPUT example: <b>$hfwrav('loc1')</b>, where <i>loc1</i> is the Location tag of the object assignment on all the pages to be returned.</li>
-			<li>Calling a named context: <b>$hfwrav('loc1', null, null, 'other')</b>, where <i>other</i> is the non-default context.  The default context is <i>default</i>, which is assumed if no other context is used.</li>
-			<li>Forcing a type: <b>$hfwrav('loc1', null, 19)</b>, where <i>19</i> forces the search to look for the setting type <i>HTML</i>.</li>
+			<li>Typical INPUT example: <b>$hfwrav(&apos;loc1&apos;)</b>, where <i>loc1</i> is the Location tag of the object assignment on all the pages to be returned.</li>
+			<li>Calling a named context: <b>$hfwrav(&apos;loc1&apos;, null, null, &apos;other&apos;)</b>, where <i>other</i> is the non-default context.  The default context is <i>default</i>, which is assumed if no other context is used.</li>
+			<li>Forcing a type: <b>$hfwrav(&apos;loc1&apos;, null, 19)</b>, where <i>19</i> forces the search to look for the setting type <i>HTML</i>.</li>
 			<li class="li_inner">&nbsp;</li>
 			<li>OUTPUT: The output array is <b>array[0 ... N]['val'=><i>the in situ value</i>, 'set_type_id'=><i>the setting type id</i>, 'obj_name'=><i>the object name</i>, 'obj_acs_str'=><i>the object access string</i>, 'pg_id'=><i>the page id</i>, 'set_type_name'=><i>the setting type name</i>, 'set_type_lbl'=><i>the setting type label</i>, 'pg_name'=><i>the page name</i>, 'pg_obj_id'=><i>the page as object id</i>, 'pg_acs_str'=><i>the page access string</i>, 'spc_ord'=><i>the special order from Values-by-Object page settings</i>]</b></li>
 			<li class="li_inner">Only one context can be returned since a context is required, even if only the default context.</li>
@@ -207,26 +221,47 @@ include($classpath . "html.obj.classes.php");
 		<p>Page spanning continues with a context oriented function <i>hfw_get_ctx_vals</i>, or its first class alias <i>$hfwgcv</i>.  The general help for that follows:</p>
 
 		<ul>
-			<li>INPUT: (<b>$ctx</b>=1, <b>$obj_type</b>=null, <b>$set_type</b>=null, <b>$asc_pg</b>=null, <b>$named_ctx</b>=null, <b>$named_obj_type</b>=null, <b>$named_set_type</b>=null, <b>$named_asc_pg</b>=null)</li>
-			<li class="li_inner"><b>$ctx</b>			<i>not required</i>, <i><b>default value=1</b></i> (this is always the context id integer&mdash;see <b>$named_ctx</b>&mdash;can be an array of values)</li>
-			<li class="li_inner"><b>$obj_type</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the object type id integer, see <b>$named_obj_type</b>, use as a filter; either single id or an array)</li>
-			<li class="li_inner"><b>$set_type</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the setting type id integer, see <b>$named_set_type</b>, use as a filter)</li>
-			<li class="li_inner"><b>$asc_pg</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the pg id integer of the object associated page, see <b>$named_asc_pg</b>, use as a filter)</li>
-			<li class="li_inner"><b>$val_pg</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the pg id integer of the setting value page, see <b>$named_val_pg</b>, use as a filter)</li>
+			<li>INPUT: (<b>$ctx</b>=1, <b>$obj_type</b>=null, <b>$set_type</b>=null, <b>$asc_pg</b>=null, <b>$val_pg</b>=null, <b>$named_ctx</b>=null, <b>$named_obj_type</b>=null, <b>$named_set_type</b>=null, <b>$named_asc_pg</b>=null,  <b>$named_val_pg</b>=null, <b>$get_def_bit</b>=false, <b>$loc_filter</b>=null)</li>
+			<li class="li_inner"><b>$ctx</b>	<i>not required</i>, <i><b>default value=1</b></i> (this is always the context id integer&mdash;see <b>$named_ctx</b>&mdash;can be an array of values)</li>
+			<li class="li_inner"><b>$obj_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is always the object type id integer, see <b>$named_obj_type</b>, use as a filter; either single id or an array)</li>
+			<li class="li_inner"><b>$set_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is always the setting type id integer, see <b>$named_set_type</b>, use as a filter)</li>
+			<li class="li_inner"><b>$asc_pg</b> <i>not required</i>, <i><b>default value=null</b></i> (this is always the pg id integer of the object associated page, see <b>$named_asc_pg</b>, use as a filter)</li>
+			<li class="li_inner"><b>$val_pg</b> <i>not required</i>, <i><b>default value=null</b></i> (this is always the pg id integer of the setting value page, see <b>$named_val_pg</b>, use as a filter)</li>
 			<li class="li_inner"><b>$named_ctx</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the text alias name for a context, though the default context is assumed so only use if another context is needed)</li>
 			<li class="li_inner"><b>$named_obj_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the object type name alias to be used instead of the id integer&#8212;see <b>$obj_type</b>&#8212;used as a filter; either single string value or array)</li>
 			<li class="li_inner"><b>$named_set_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the text setting type name alias to be used instead of the id integer&#8212;see <b>$set_type</b>&#8212;used as a filter)</li>
-			<li class="li_inner"><b>$named_asc_pg</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the object associated page, see <b>$asc_pg</b>, use as a filter)</li>
-			<li class="li_inner"><b>$named_val_pg</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the setting value page, see <b>$val_pg</b>, use as a filter)</li>
-			<li class="li_inner"><b>$get_def_bit</b>			<i>required</i>, <i><b>default value=true</b></i> (retrieve default values regardless of the setting value page parameter, or not.  Will not block value page values.)</li>
-			<li class="li_inner"><b>$loc_filter</b>			<i>not required</i>, <i><b>default value=null</b></i> (a single location string or array of location strings to search on for values.)</li>
+			<li class="li_inner"><b>$named_asc_pg</b> <i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the object associated page, see <b>$asc_pg</b>, use as a filter)</li>
+			<li class="li_inner"><b>$named_val_pg</b> <i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the setting value page, see <b>$val_pg</b>, use as a filter)</li>
+			<li class="li_inner"><b>$get_def_bit</b> <i>required</i>, <i><b>default value=false (changed)</b></i> (retreive fallback default values if true for page values or ctx values if they have been set and active for the object.  Will be retrieved in addition to any specific page or ctx values.)</li>
+			<li class="li_inner"><b>$loc_filter</b> <i>not required</i>, <i><b>default value=null</b></i> (a single location string or array of location strings to search on for values.)</li>
 			<li class="li_inner">&nbsp;</li>
+			
 			<li>Typical INPUT example, calling a context, object type and setting type by name: <b>$hfwgcv(null, null, null, null, 'ctx1', 'frm_obj', 'html')</b>.</li>
-			<li>The same using ids: <b>$hfwgcv(2, 8, 19)</b>.</li>
+			<li>The same using ids: <b>$hfwgcv(3, 8, 19)</b>.</li>
 			<li class="li_inner">&nbsp;</li>
-			<li>OUTPUT: The output array is <b>array[0 ... N]['set_val_id'=><i>the setting id</i>, 'pg_obj_id'=><i>the page object id</i>, 'pg_obj_set_type_id'=><i>the page object setting type id</i>, 'val'=><i>the setting value</i>, 'set_val_pg_id'=><i>the page id for the setting value-if any</i>, 'ctx_id'=><i>context id</i>, 'ctx_name'=><i>context name</i>, 'ctx_lbl'=><i>context label</i>, 'ctx_spc_ord'=><i>context special order</i>, 'set_type_name'=><i>the type name</i>, 'set_type_lbl'=><i>the setting type label</i>, 'obj_type_name'=><i>the page object type name</i>, 'obj_type_lbl'=><i>the page object type label</i>, 'obj_name'=><i>the object label</i>, 'asc_pg_id'=><i>the id of the object associated page</i>, 'asc_pg_obj_loc'=><i>the label tag of the object associated page</i>]</b></li>
+			
+			<li>OUTPUT: The output array is <br>&emsp;&emsp;
+			<b>array[0 ... N]['set_val_id'=><i>the setting id</i>, <br>&emsp;&emsp;
+			'pg_obj_id'=><i>the page object id</i>, <br>&emsp;&emsp;
+			'pg_obj_set_type_id'=><i>the page object setting type id</i>, <br>&emsp;&emsp;
+			'val'=><i>the setting value</i>, <br>&emsp;&emsp;
+			'set_val_pg_id'=><i>the page id for the setting value-if any</i>, <br>&emsp;&emsp;
+			'ctx_id'=><i>context id</i>, <br>&emsp;&emsp;
+			'ctx_name'=><i>context name</i>, <br>&emsp;&emsp;
+			'ctx_lbl'=><i>context label</i>, <br>&emsp;&emsp;
+			'ctx_spc_ord'=><i>context special order</i>, <br>&emsp;&emsp;
+			'set_type_name'=><i>the type name</i>, <br>&emsp;&emsp;
+			'set_type_lbl'=><i>the setting type label</i>, <br>&emsp;&emsp;
+			'obj_type_name'=><i>the page object type name</i>, <br>&emsp;&emsp;
+			'obj_type_lbl'=><i>the page object type label</i>, <br>&emsp;&emsp;
+			'obj_name'=><i>the object label</i>, <br>&emsp;&emsp;
+			'asc_pg_id'=><i>the id of the object associated page</i>, <br>&emsp;&emsp;
+			'asc_pg_obj_loc'=><i>the label tag of the object associated page</i>,<br>&emsp;&emsp;
+			'obj_spec_ord'=><i>object special order</i>, <br>&emsp;&emsp;
+			'use_def_bit'=><i>use page default value</i>, <br>&emsp;&emsp;
+			'use_def_ctx_bit'=><i>use default context (def_ctx) value]</i></b></li>
 			<li class="li_inner">Only one context can be returned since a context is required, even if only the default context.</li>
-			<li class="li_inner">Default values can be returned if the use_def_bit page-object setting is not false.   These will need to be handled in code if there are page specific values as well.</li>
+			<li class="li_inner">Default values are returned if the obj use default bit is set or use default context bit is set.   These will need to be handled in code if there are page specific values as well.</li>
 			<li class="li_inner">If no page is used as an object filter, then all the objects of a given context, object type (if any) and setting type (if any) will be returned.</li>
 			<li class="li_inner">If no object type is used as an object filter then objects of all types will be returned.</li>
 			<li class="li_inner">If no setting type is used as a filter, then setting values of all types will be returned.</li>
@@ -238,14 +273,14 @@ include($classpath . "html.obj.classes.php");
 		<p>As before, there is a helper function for <i>$hfwgcv</i> called <i>hfwn_get_ctx_vals</i>, or its first class alias <i>$hfwngcv</i>.  The general help for that follows:</p>
 
 		<ul>
-			<li>INPUT: (<b>$named_ctx</b>=null, <b>$named_obj_type</b>=null, <b>$named_set_type</b>=null, <b>$named_asc_pg</b>=null)</li>
+			<li>INPUT: (<b>$named_ctx</b>=null, <b>$named_obj_type</b>=null, <b>$named_set_type</b>=null, <b>$named_asc_pg</b>=null,  <b>$named_val_pg</b>=null, <b>$get_def_bit</b>=false, <b>$loc_filter</b>=null)</li>
 			<li class="li_inner"><b>$named_ctx</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the text alias name for a context, though the default context is assumed so only use if another context is needed&mdash;can be an array of named values)</li>
 			<li class="li_inner"><b>$named_obj_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the object type name alias to be used instead of the id integer&#8212;see <b>$obj_type</b>&#8212;used as a filter; either single string value or an array of strings.)</li>
 			<li class="li_inner"><b>$named_set_type</b>	<i>not required</i>, <i><b>default value=null</b></i> (this is the text setting type name alias to be used instead of the id integer&#8212;see <b>$set_type</b>&#8212;used as a filter)</li>
-			<li class="li_inner"><b>$named_asc_pg</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the object associated page, see <b>$asc_pg</b>, use as a filter)</li>
-			<li class="li_inner"><b>$named_val_pg</b>			<i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the setting value page, see <b>$val_pg</b>, use as a filter)</li>
-			<li class="li_inner"><b>$get_def_bit</b>			<i>required</i>, <i><b>default value=true</b></i> (retrieve default values regardless of the setting value page parameter, or not.  Will not block value page values.)</li>
-			<li class="li_inner"><b>$loc_filter</b>			<i>not required</i>, <i><b>default value=null</b></i> (a single location string or array of location strings to search on for values.)</li>
+			<li class="li_inner"><b>$named_asc_pg</b> <i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the object associated page, see <b>$asc_pg</b>, use as a filter)</li>
+			<li class="li_inner"><b>$named_val_pg</b> <i>not required</i>, <i><b>default value=null</b></i> (this is always the pg tag of the setting value page, see <b>$val_pg</b>, use as a filter)</li>
+			<li class="li_inner"><b>$get_def_bit</b> <i>required</i>, <i><b>default value=false (changed)</b></i> (retreive fallback default values if true for page values or ctx values if they have been set and active for the object.  Will be retrieved in addition to any specific page or ctx values.)</li>
+			<li class="li_inner"><b>$loc_filter</b> <i>not required</i>, <i><b>default value=null</b></i> (a single location string or array of location strings to search on for values.)</li>
 			<li class="li_inner">&nbsp;</li>
 			<li>Typical INPUT example, calling a context, object type and setting type by name: <b>$hfwgcv('ctx1', 'frm_obj', 'html')</b>.</li>
 			<li>Getting the default context values for objects associated with the given page: <b>$hfwngcv(null, null, null, 'pg')</b>.</li>

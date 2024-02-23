@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -72,7 +72,9 @@ function get_pg_list($pg_ctx_id=null)
 			(pg_id = pgs.id) 
 	Where pgs.pg_obj_id = pg_objs.id and 
 		pgs.pg_ctx_id = ctx.id $extra 
-	Order by obj_name, 
+	Order by pgs.pg_ctx_id, 
+		If(isnull(ppob.spc_ord), 1000, ppob.spc_ord), 
+		obj_name, 
 		pg_objs.id";
 
 	$result_array_1 = array(	'obj_id', 
@@ -99,6 +101,7 @@ function get_pg_info($pg_id=null)
 		obj_name, 
 		obj_dsr, 
 		ppob.pg_obj_loc, 
+		ppob.spc_ord, 
 		pgs.pg_ctx_id, 
 		ctx.ctx_name, 
 		ctx.ctx_lbl, 
@@ -108,7 +111,8 @@ function get_pg_info($pg_id=null)
 		pgs 
 		Left Join 
 			(Select pg_obj_loc, 
-				pg_id 
+				pg_id, 
+				spc_ord 
 			From pg_pg_obj_brg as ppob, 
 				pgs, 
 				pg_objs 
@@ -121,19 +125,20 @@ function get_pg_info($pg_id=null)
 		pgs.pg_ctx_id = ctx.id ";
 
 	$result_array_1b = array(	'sel_obj_id', 
-										'sel_obj_name', 
-										'sel_obj_dsr', 
-										'sel_obj_loc', 
-										'sel_pg_ctx_id', 
-										'sel_pg_ctx_name', 
-										'sel_pg_ctx_lbl', 
-										'sel_acs_str');
+											'sel_obj_name', 
+											'sel_obj_dsr', 
+											'sel_obj_loc', 
+											'sel_pg_ord', 
+											'sel_pg_ctx_id', 
+											'sel_pg_ctx_name', 
+											'sel_pg_ctx_lbl', 
+											'sel_acs_str');
 
 	return row_pattern($pg_sql, 'i', array('id'=>$pg_id), $result_array_1b);
 	}
 
 //____________________________________________________________________________________
-function create_pg($obj_name=null, $obj_dsr=null, $acs_str=null, $url_tag=null, $pg_ctx_id=null)
+function create_pg($obj_name=null, $obj_dsr=null, $acs_str=null, $url_tag=null, $pg_ctx_id=null, $pg_spc_ord=null)
 {
 	if (empty($obj_name) ) {return null;}
 	if (!check_index($pg_ctx_id) ) {$pg_ctx_id = 2;}
@@ -149,8 +154,8 @@ function create_pg($obj_name=null, $obj_dsr=null, $acs_str=null, $url_tag=null, 
 
 	$type_str_2 = 'sss';
 	$bind_array_2 = array(	'obj_name'=>mb_prepstr($obj_name, 63), 
-									'obj_dsr'=>mb_prepstr($obj_dsr, 255), 
-									'acs_str'=>mb_prepstr($acs_str, 255) );
+										'obj_dsr'=>mb_prepstr($obj_dsr, 255), 
+										'acs_str'=>mb_prepstr($acs_str, 255) );
 
 	$pg_obj_id = ins_pattern($insert_obj_sql, $type_str_2, $bind_array_2);	
 
@@ -170,12 +175,15 @@ function create_pg($obj_name=null, $obj_dsr=null, $acs_str=null, $url_tag=null, 
 		(pg_id, 
 		pg_obj_id, 
 		pg_obj_loc, 
+		spc_ord, 
 		act_bit) 
-	Values (?, ?, ?, true)";
+	Values (?, ?, ?, ?, true)";
 
-	return ins_pattern($insert_pg_brg_sql, 'iis', array(	'pg_id'=>$pg_id, 
-																		'pg_obj_id'=>$pg_obj_id, 
-																		'pg_obj_loc'=>mb_prepstr2($url_tag, 255) ) );
+	return ins_pattern($insert_pg_brg_sql, 'iisi', array(	'pg_id'=>$pg_id, 
+																				'pg_obj_id'=>$pg_obj_id, 
+																				'pg_obj_loc'=>mb_prepstr2($url_tag, 255), 
+																				'pg_spc_ord'=>$pg_spc_ord
+																				) );
 	}
 
 //____________________________________________________________________________________
@@ -259,9 +267,11 @@ function get_pg_objs($pg_id=null, $filter_objs=false)
 		acs_str, 
 		po.act_bit, 
 		types.type_name, 
+		types.std_type_lbl, 
 		ppob.pg_obj_loc, 
 		ppob.spc_ord, 
 		ppob.use_def_bit, 
+		ppob.use_def_ctx_bit, 
 		ppob.act_bit 
 	From types, 
 		pg_objs as po 
@@ -270,6 +280,7 @@ function get_pg_objs($pg_id=null, $filter_objs=false)
 				pg_obj_loc, 
 				spc_ord, 
 				use_def_bit, 
+				use_def_ctx_bit, 
 				act_bit 
 			From pg_pg_obj_brg 
 			Where pg_id = ?) as ppob
@@ -283,15 +294,17 @@ function get_pg_objs($pg_id=null, $filter_objs=false)
 		po.obj_name";
 
 	$result_array_2 = array('pg_obj_id', 
-									'pg_obj_name', 
-									'pg_obj_dsr', 
-									'pg_obj_acs_str', 
-									'pg_obj_act_bit', 
-									'pg_obj_type_name', 
-									'pg_obj_loc', 
-									'pg_obj_spc_ord', 
-									'pg_obj_use_def_bit', 
-									'pg_obj_brg_act_bit');
+										'pg_obj_name', 
+										'pg_obj_dsr', 
+										'pg_obj_acs_str', 
+										'pg_obj_act_bit', 
+										'pg_obj_type_name', 
+										'pg_obj_type_lbl', 
+										'pg_obj_loc', 
+										'pg_obj_spc_ord', 
+										'pg_obj_use_def_bit', 
+										'pg_obj_use_def_ctx_bit', 
+										'pg_obj_brg_act_bit');
 
 	return tcol_pattern($pg_objs_sql, $str, $input, $result_array_2);
 	}

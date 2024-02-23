@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -47,6 +47,7 @@ function menu_maker($list_array=null, $newpg=1)
 			{$menu[] = "core=&nbsp;";}
 		}
 
+	//"
 	return $aoo('ul', "core={$aoa('li', $menu)}");
 	}
 
@@ -63,9 +64,47 @@ function row_color($i=0, $even="#FFF", $odd="#CFC")
 	}
 
 //___________________________________________________________________________________________
-
+function get_db_info()
+{
+	$query = "Select db_name, 
+		db_lbl, 
+		db_dsr 
+	From db_meta_data 
+	Limit 1";
+	
+	return row_pattern($query, null, null, array('db_name', 'db_lbl', 'db_dsr') );
+	}
+	
+//___________________________________________________________________________________________
+function upd_db_info($name=null, $lbl=null, $dsr=null)
+{
+	if (empty($name) ) {return null;}
+	if (empty($lbl) ) {$lbl = null;}
+	if (empty($dsr) ) {$dsr = null;}
+	
+	$name = mb_prepstr($name, 63);
+	$lbl = mb_prepstr($lbl, 63);
+	$dsr = mb_prepstr($dsr, 1023);
+	
+	$query = "Update db_meta_data Set db_name = ?, db_lbl = ?, db_dsr = ?";
+	
+	return ins_pattern($query, 'sss', array($name, $lbl, $dsr) );
+	}
+	
+//___________________________________________________________________________________________
+function get_db_lbl()
+{
+	$query = "Select db_lbl 
+	From db_meta_data 
+	Limit 1";
+	
+	return row_pattern($query, null, null, array('myproject') );
+	}
+	
+//___________________________________________________________________________________________
 
 $mm = 'menu_maker';
+$gdbl = 'get_db_lbl';
 
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -29,11 +29,11 @@ or implied, of Cargotrader, Inc.
 
 require_once('hoopla.fw.rel.path.php');
 
-include($classpath . "html.obj.classes.php");
+require_once($incpath . 'common.incs.php');
 
 ?>
 <!DOCTYPE html> 
-<html>
+<html lang="en-US">
 
 <?php
 	$title = "Hoopla Framework";
@@ -56,7 +56,8 @@ include($classpath . "html.obj.classes.php");
 	<div id="site_content">		
 	
 <?php
-	include($sidepath . "std.sidebar.php");
+	include($sidepath . "std.sidebar.top.php");
+	include($sidepath . "std.sidebar.bot.php");
 ?>
 
 	  <div id="content">

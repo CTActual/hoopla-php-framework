@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -32,6 +32,7 @@ or implied, of Cargotrader, Inc.
 			// Set all the active records to false for the page to make things easy
 			$update_result = set_pg_pg_obj_brg_act_bit_false($pg_id);
 			$use_def_bit_result = set_pg_pg_obj_brg_use_def_bit_false($pg_id);
+			$use_def_ctx_bit_result = set_pg_pg_obj_brg_use_def_ctx_bit_false($pg_id);
 
 			// Now we see if anything came of the entry process
 			// Go thru each object to see if they were selected (only active objects get an update)
@@ -50,6 +51,14 @@ or implied, of Cargotrader, Inc.
 					$insert_use_def_result = set_pg_pg_obj_brg_use_def_bit($pg_id, $id_val);
 					}	# End of foreach
 				}	# End of use_def_bit updates
+
+			if (isset($_POST['use_def_ctx_obj']) ) 
+			{
+				foreach($_POST['use_def_ctx_obj'] as $use_def_key=>$id_val)
+				{
+					$insert_use_def_ctx_result = set_pg_pg_obj_brg_use_def_ctx_bit($pg_id, $id_val);
+					}	# End of foreach
+				}	# End of use_def_ctx_obj updates
 
 			$non_pg_obj_list = get_non_pg_obj_ids();
 

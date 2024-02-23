@@ -1,7 +1,7 @@
     <footer>
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -44,7 +44,7 @@ or implied, of Cargotrader, Inc.
 
 ?>
 		<br><br>
-		Copyright &copy;2023 Cargotrader, Inc. (see source code for licensing)
+		Copyright &copy;2024 Cargotrader, Inc. (see source code for licensing)
 		<br>
 		  Website template by <a href="http://www.freehtml5templates.co.uk">Free HTML5 Templates</a>
     </footer>

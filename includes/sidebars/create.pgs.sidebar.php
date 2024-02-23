@@ -29,7 +29,7 @@
 		<div class="sidebar">
           <div class="sidebar_item">
             <h2>Page Order</h2>
-            <p>Shows the current page ordering.</p>         
+            <p>Shows the current page ordering within its page context so that page information can be retrieved in that order.</p>         
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->  		
 

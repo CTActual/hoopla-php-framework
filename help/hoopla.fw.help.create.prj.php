@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@ or implied, of Cargotrader, Inc.
 
 require_once('hoopla.fw.rel.path.php');
 
-include($classpath . "html.obj.classes.php");
+require_once($incpath . 'common.incs.php');
 
 ?>
 <!DOCTYPE html> 
@@ -56,7 +56,8 @@ include($classpath . "html.obj.classes.php");
 	<div id="site_content">		
 	
 <?php
-	include($sidepath . "std.sidebar.php");
+	include($sidepath . "std.sidebar.top.php");
+	include($sidepath . "std.sidebar.bot.php");
 ?>
 
 	  <div id="content">
@@ -66,7 +67,7 @@ include($classpath . "html.obj.classes.php");
 		<p><b>The Basics</b></p>
 
 		<ul>
-			<li>A project website is composed of one or pages, even if they share a lot of features in common.</li>
+			<li>A project website is composed of one or more pages, even if they share a lot of features in common.</li>
 			<li>A Hoopla project template will call several pages through some sort of API (either simple GETs, REST or elsewise).</li>
 			<li>A page&#8212;each of which can have a name&#8212;will be linked to several Hoopla FW objects.</li>
 			<li>Objects are created, as needed, and then linked to pages.  You can have one object link to several pages.  Linking an object to a page is called an Assignment.</li>

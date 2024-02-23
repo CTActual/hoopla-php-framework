@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -45,10 +45,10 @@ or implied, of Cargotrader, Inc.
 
 	echo $aoo('hidden', "name=page;\nvalue=true");
 
-	//--1-- End of first form
+	//"--1-- End of first form
 	echo "</form>";
 
-// _________________________________________________________________________________________
+//" _________________________________________________________________________________________
 	if (isset($_POST['page']) || isset($_POST['repage']) )
 	{
 		// Clean up empty string records
@@ -203,6 +203,7 @@ TABLEDATA;
 		
 		$pg_ctx_sel = $aoo('select', "class=sel_css;\nname=pg_ctx_id;\ncore={$aoo('option', "value={$pg_ctxs['ctx_id']};\ntval={$pgctxid};\ndval=2;\nlabel={$pg_ctxs['ctx_opt_lbl']}")}");
 
+		//"
 		echo $aoo('cb', "name=assign;\nvalue=true;\nlabel=&nbsp;Assign new object to existing pages of context $pg_ctx_sel at location:&nbsp;;\nfore=<br>");
 		echo $aoo('textbox', "name=location;\nsize=30;\nmax=255;\naft=<br>");
 		echo $aoo('cb', "name=order;\nvalue=true;\nlabel=&nbsp;Place object at the end of the object list for each page.;\naft=<br>");

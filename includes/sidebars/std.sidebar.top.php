@@ -2,6 +2,14 @@
 
 		<div class="sidebar">
           <div class="sidebar_item">
+            <h2>Projects</h2>
+            <h3 id="myproject">Current: <?php echo $gdbl(); ?></h3>
+            <p>Select the project you would like to work on.</p>
+          </div><!--close sidebar_item--> 
+        </div><!--close sidebar-->     		
+
+		<div class="sidebar">
+          <div class="sidebar_item">
             <h2>Pages</h2>
             <p>Create your own PHP templates, then point web pages at them through this UI.</p>
           </div><!--close sidebar_item--> 
@@ -29,4 +37,10 @@
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->  		
 
-
+		<div class="sidebar">
+          <div class="sidebar_item">
+            <h2>Contexts</h2>
+            <h3>Going Beyond Page and Location</h3>
+            <p>For object reuse on the same page, when the page state changes, or grouping objects together.  There is a trade-off between creating more objects and having more contexts.</p>         
+		  </div><!--close sidebar_item--> 
+        </div><!--close sidebar-->  		

@@ -31,6 +31,7 @@ or implied, of Cargotrader, Inc.
 
 	$sel_obj_id = 0;
 	$sel_obj_name = "";
+	$sel_pg_ord = "";
 	$sel_obj_dsr = "";
 	$sel_obj_loc = "";
 	$sel_acs_str = "";
@@ -40,7 +41,7 @@ or implied, of Cargotrader, Inc.
 
 	if (isset($_POST['page']) && isset($_POST['newpage']) )
 	{
-		$pg_brg_id = create_pg($_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str'], $_POST['url_tag'], $_POST['pg_ctx_id']);
+		$pg_brg_id = create_pg($_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str'], $_POST['url_tag'], $_POST['pg_ctx_id'], $_POST['pg_ord']);
 
 		// Deal with cloning of objects
 		if (isset($_POST['clone_pg_id']) && check_index($_POST['clone_pg_id']) && $_POST['clone_pg_id'] != '0' && check_index($pg_brg_id) )
@@ -50,11 +51,20 @@ or implied, of Cargotrader, Inc.
 		}
 	elseif (isset($_POST['page']) && isset($_POST['activebit']) && isset($_POST['pg_hid']) )
 	{
-		foreach($_POST['pg_hid'] as $pg_obj_id)
+		// Update upper box for active bit and context ordering
+		foreach($_POST['pg_hid'] as $pg_key=>$pg_obj_id)
 		{
 			if (isset($_POST['pgs_act'][$pg_obj_id]) && $_POST['pgs_act'][$pg_obj_id] = $pg_obj_id)
 				{$tf = true;} else {$tf = false;}
+				
 			$pg_tf = set_pg_obj_tf($pg_obj_id, $tf);
+			
+			if (isset($_POST['pg_ord_box'][$pg_obj_id]) && check_index($_POST['pg_ord_box'][$pg_obj_id]) )
+				{$pg_spc_ord = (isset($_POST['pg_ord_box'][$pg_obj_id]) && check_index($_POST['pg_ord_box'][$pg_obj_id]) ) ? $_POST['pg_ord_box'][$pg_obj_id] : null;}
+			else
+				{$pg_spc_ord = null;}
+
+			update_obj_spc_ord($_POST['pg_hid2'][$pg_key], $pg_obj_id, $pg_spc_ord);
 			}
 		} 
 	elseif (isset($_POST['page']) && isset($_POST['updatepage']) )
@@ -62,6 +72,7 @@ or implied, of Cargotrader, Inc.
 		$upd_pg = update_pg_obj($_POST['sel_pg_obj_id'], $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
 		$upd_pg_brg = update_pg_brg($_POST['sel_pg_id'], $_POST['sel_pg_obj_id'], $_POST['url_tag']);
 		$upd_pg_ctx = update_pg_ctx_id($_POST['sel_pg_id'], $_POST['pg_ctx_id']);
+		$upd_pg_spc_ord = update_obj_spc_ord($_POST['sel_pg_id'], $_POST['sel_pg_obj_id'], $_POST['pg_ord']);
 		} 
 	elseif (isset($_POST['page']) && isset($_POST['edit_pg']) )
 	{
@@ -87,16 +98,16 @@ $tabletop = <<<TABLETOP
 <caption>Add/Edit Pages</caption>
 <thead>
 <tr>
-    <th>Page ID</th>
-    <th>Page Name</th>
-    <th>Description</th>
-   <th>URL Tag</th>
-    <th>Page<br>Order</th>
-  <th>Access<br>String</th>
-    <th style="text-align:center;" >Page<br>Obj ID</th>
-    <th style="text-align:center;" >Page Context</th>
-    <th style="text-align:center;" >Active</th>
-    <th style="text-align:center;" >Edit</th>
+	<th>Page ID</th>
+	<th>Page Name</th>
+	<th>Description</th>
+	<th>URL Tag</th>
+	<th>Page<br>Order</th>
+	<th>Access<br>String</th>
+	<th style="text-align:center;" >Page<br>Obj ID</th>
+	<th style="text-align:center;" >Page Context</th>
+	<th style="text-align:center;" >Active</th>
+	<th style="text-align:center;" >Edit</th>
 </tr>
 </thead>
 <tbody>
@@ -117,19 +128,22 @@ TABLETOP;
 
 		if (isset($edit_pg_id) && $pg_id == $edit_pg_id) {$button_class = "class=button_active";} else {$button_class = "class=button_passive";}
 		$edit_button = $aoo('button', "{$button_class};\nname=edit_pg[{$pg_id}];\nvalue=true;\nlabel=Select");
+		
+		$pg_hid2 = $aoo('hidden', "name=pg_hid2[];\nvalue=$pg_id");
+		$pg_ord_box = $aoo('textbox', "class=spcord;\nname=pg_ord_box[$obj_id];\nvalue=$pg_ord");
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="$bc text-align:center; ">$pg_id</td>\n
-    <td style="$bc ">$obj_name</td>\n
-    <td style="$bc ">$obj_dsr</td>\n
-    <td style="$bc ">$url_tag</td>\n
-     <td style="$bc text-align:center; ">$pg_ord</td>\n
-   <td style="$bc ">$acs_str</td>\n
-    <td style="$bc text-align:center; ">$obj_id</td>\n
-    <td style="$bc text-align:center; ">$pg_ctx_name ($pg_ctx_id)</td>\n
-    <td style="$bc text-align:center; ">$pgs_bit{$pg_hid}</td>\n
-    <td style="$bc text-align:center; ">$edit_button</td>\n
+	<td style="$bc" class="ctrtd">$pg_id</td>\n
+	<td style="$bc">$obj_name</td>\n
+	<td style="$bc">$obj_dsr</td>\n
+	<td style="$bc">$url_tag</td>\n
+	<td style="$bc" class="ctrtd">$pg_ord_box$pg_hid2</td>\n
+	<td style="$bc">$acs_str</td>\n
+	<td style="$bc" class="ctrtd">$obj_id</td>\n
+	<td style="$bc" class="ctrtd">$pg_ctx_name ($pg_ctx_id)</td>\n
+	<td style="$bc" class="ctrtd">$pgs_bit{$pg_hid}</td>\n
+	<td style="$bc" class="ctrtd">$edit_button</td>\n
 </tr>\n
 TABLEDATA;
 
@@ -143,7 +157,7 @@ TABLEDATA;
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td colspan="10" style="$bc text-align:center; ">Please Create Your First Page Below!</td>\n
+    <td colspan="10" style="$bc" class="ctrtd">Please Create Your First Page Below!</td>\n
 </tr>\n
 TABLEDATA;
 
@@ -152,7 +166,7 @@ TABLEDATA;
 
 	echo "</tbody>";
 	echo "</table><br>\n";
-	echo $aoo('button', "class=button_passive;\nname=activebit;\nvalue=true;\nlabel=Update Active Page List;\naft=<br>");
+	echo $aoo('button', "class=button_passive;\nname=activebit;\nvalue=true;\nlabel=Update Active Page List and Ordering;\naft=<br>");
 	echo "<br></fieldset><br>\n";
 
 //_____________________________________________________________________________________________________________
@@ -172,7 +186,7 @@ TABLEDATA;
 		}
 	else {$clone = '';}
 	
-	// See if this is a new page or selected page
+	//" See if this is a new page or selected page
 	// Note we show the pg object id and not the page id of the selected page
 	if (isset($sel_obj_id) && check_index($sel_obj_id) ) 
 		{$legend = "Create New Page or Edit Page {$aoo('span', "core=$sel_obj_name ($sel_obj_id)")}";} 
@@ -183,10 +197,12 @@ TABLEDATA;
 	echo $aoo('textbox', "name=obj_name;\nsize=50;\nmax=50;\nvalue=$sel_obj_name;\nlabel=&nbsp;Page Name (Unique and Required);\naft=<br>");
 	echo $aoo('textbox', "name=url_tag;\nsize=50;\nmax=50;\nvalue=$sel_obj_loc;\nlabel=&nbsp;Optional URL Tag (Good Idea but Not Required);\naft=<br>");
 	echo $aoo('textbox', "name=acs_str;\nsize=50;\nmax=50;\nvalue=$sel_acs_str;\nlabel=&nbsp;Added Security Access String (Not Required);\naft=<br>");
+	echo $aoo('textbox', "name=pg_ord;\nsize=10;\nmax=10;\nvalue=$sel_pg_ord;\nlabel=&nbsp;Page Order Within Its Page Context (Not Required);\naft=<br>");
 	
 	$pg_ctx_id = (isset($_POST['pg_ctx_id']) && check_index($_POST['pg_ctx_id']) ) ? $_POST['pg_ctx_id'] : $sel_pg_ctx_id;
 	echo $aoo('select', "class=sel_css sel_css_m;\nname=pg_ctx_id;\ncore={$aoo('option', "value={$pg_ctxs['ctx_id']};\ntval={$pg_ctx_id};\ndval=2;\nlabel={$pg_ctxs['ctx_opt_lbl']}")};\nlabel=&nbsp;Page Context;\naft=<br>");
 	
+	//"
 	echo $aoo('textarea', "name=obj_dsr;\nrows=5;\ncols=70;\nvalue=$sel_obj_dsr;\nlabel=&nbsp;<br>Page Description (Highly Desirable);\naft=<br>");
 
 	echo $clone;

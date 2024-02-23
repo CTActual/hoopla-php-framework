@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -98,12 +98,19 @@ or implied, of Cargotrader, Inc.
 								} 
 							}
 
+						// Update the use_def_bit -- use the default value for the page if a page specific val does not exist.
 						if (isset($_POST['use_def_obj'][$j]) && check_index($_POST['use_def_obj'][$j]) && $_POST['use_def_obj'][$j] == $pg_id) 
 							{$udb = true;} 
 						else 
 							{if ($pg_tf) {$udb = true;} else {$udb = false;} }
 						
-						$update = update_pg_pg_obj_brg($pg_id, $pg_obj_id, $obj_loc, $spc_ord, $tf, $udb);
+						// Update the use_def_ctx_bit -- use the default context (def_ctx) value for the page if the referred context val does not exist.
+						if (isset($_POST['use_def_ctx_obj'][$j]) && check_index($_POST['use_def_ctx_obj'][$j]) && $_POST['use_def_ctx_obj'][$j] == $pg_id) 
+							{$udcb = true;} 
+						else 
+							{if ($pg_tf) {$udcb = true;} else {$udcb = false;} }
+						
+						$update = update_pg_pg_obj_brg($pg_id, $pg_obj_id, $obj_loc, $spc_ord, $tf, $udb, $udcb);
 						}
 					}	# End of for loop
 				}	# End of conditional
@@ -145,7 +152,7 @@ $tabletop = <<<TABLETOP
     <th>Page Obj ID</th>
     <th>$sel_obj_name_span<br>Page Special Order</th>
     <th>$sel_obj_name_span<br>Page Location</th>
-    <th>Allow<br>Defaults</th>
+    <th>Fallbacks<br>PG|CTX</th>
     <th>$sel_obj_name_span<br>Page Assignment</th>
     <th>Add/Edit Values</th>
 </tr>
@@ -179,6 +186,10 @@ TABLETOP;
 			$loc_tb = $aoo('textbox', "name=loc_tb[$i];\nvalue=$obj_loc;\nmax=255;\nsize=15");
 
 			$use_def_obj = $aoo('cb', "name=use_def_obj[$i];\nvalue=$pg_id;\ntf=$ppob_use_def_bit");
+			$udo_div = $aoo('span', "style=text-align:center;;\ncore=$use_def_obj");
+
+			$use_def_ctx_obj = $aoo('cb', "name=use_def_ctx_obj[$i];\nvalue=$pg_id;\ntf=$ppob_use_def_ctx_bit");
+			$udco_div = $aoo('span', "style=text-align:center;\ncore=$use_def_ctx_obj");
 
 			$act_obj = $aoo('cb', "{$dis}name=act_obj[$i];\nvalue=$pg_id;\ntf=$ppob_act_bit");
 
@@ -211,7 +222,7 @@ $tabledata = <<<TABLEDATA
     <td style="text-align:center; $bc">$pg_obj_id</td>\n
     <td style="text-align:center; $bc">$spc_ord_tb</td>\n
     <td style="text-align:center; $bc">$loc_tb</td>\n
-    <td style="text-align:center; $bc">$use_def_obj&nbsp;</td>\n
+    <td style="text-align:center; $bc">$udo_div$udco_div</td>\n
     <td style="text-align:center; $bc">$act_obj</td>\n
     <td style="text-align:center; $bc">$select</td>\n
  </tr>\n

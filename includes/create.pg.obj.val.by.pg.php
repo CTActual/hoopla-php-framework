@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -58,7 +58,7 @@ $tabletop = <<<TABLETOP
 <thead>
 <tr>
     <th style="text-align:center;" >Assigned</th>
-    <th style="text-align:center;" >Allow<br>Defaults</th>
+    <th style="text-align:center;" >Fallbacks<br>PG|CTX</th>
     <th>Object Type</th>
     <th>Object Name (id)</th>
     <th>Object Location on<br>Template (not value)</th>
@@ -90,6 +90,10 @@ TABLETOP;
 			if ($pg_obj_brg_act_bit) {$obj_count++;}
 			
 			$use_def_obj = $aoo('cb', "name=use_def_obj[];\nvalue=$pg_obj_id;\ntf=$pg_obj_use_def_bit");
+			$udo_div = $aoo('span', "style=text-align:center;;\ncore=$use_def_obj");
+
+			$use_def_ctx_obj = $aoo('cb', "name=use_def_ctx_obj[];\nvalue=$pg_obj_id;\ntf=$pg_obj_use_def_ctx_bit");
+			$udco_div = $aoo('span', "style=text-align:center;\ncore=$use_def_ctx_obj");
 
 			$pg_obj_name_div = $aoo('div', "class=name_border;\ncore=$pg_obj_name ($pg_obj_id)");
 
@@ -114,16 +118,16 @@ TABLETOP;
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="text-align:center;$bc" id="$pg_obj_id">$act_obj&nbsp;</td>\n
-    <td style="text-align:center;$bc">$use_def_obj&nbsp;</td>\n
-    <td style="$bc">$pg_obj_type_name</td>\n
+    <td style="$bc" class="ctrtd" id="$pg_obj_id">$act_obj</td>\n
+    <td style="$bc" class="ctrtd">$udo_div$udco_div</td>\n
+    <td style="$bc" class="ctrtd smalltd">$pg_obj_type_name<br>(<i>$pg_obj_type_lbl</i>)</td>\n
     <td style="$bc">$pg_obj_name_div</td>\n
     <td style="$bc">$obj_loc</td>\n
     <td style="$bc">$pg_obj_dsr</td>\n
     <td style="$bc">$pg_obj_acs_str</td>\n
-    <td style="text-align:center;$bc">$obj_spc_ord</td>\n
-    <td style="text-align:center;$bc">$enabled</td>\n
-    <td style="text-align:center;$bc">$select</td>\n
+    <td style="$bc" class="ctrtd">$obj_spc_ord</td>\n
+    <td style="$bc" class="ctrtd">$enabled</td>\n
+    <td style="$bc" class="ctrtd">$select</td>\n
  </tr>\n
 TABLEDATA;
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -56,7 +56,7 @@ $tabletop = <<<TABLETOP
 <thead>
 <tr>
     <th style="text-align:center;" >Assigned</th>
-    <th style="text-align:center;" >Allow<br>Defaults</th>
+    <th style="text-align:center;" >Fallbacks<br>PG|CTX</th>
     <th>Object Type</th>
     <th>Object Name (id)</th>
     <th>Object Location on Template (not value)</th>
@@ -86,6 +86,10 @@ TABLETOP;
 			if ($pg_obj_brg_act_bit) {$obj_count++;}
 
 			$use_def_obj = $aoo('cb', "name=use_def_obj[];\nvalue=$pg_obj_id;\ntf=$pg_obj_use_def_bit");
+			$udo_div = $aoo('span', "style=text-align:center;;\ncore=$use_def_obj");
+
+			$use_def_ctx_obj = $aoo('cb', "name=use_def_ctx_obj[];\nvalue=$pg_obj_id;\ntf=$pg_obj_use_def_ctx_bit");
+			$udco_div = $aoo('span', "style=text-align:center;\ncore=$use_def_ctx_obj");
 
 			$obj_loc = $aoo('textbox', "name=obj_loc_{$pg_obj_id};\nsize=30;\nmax=30;\nvalue=$pg_obj_loc");
 
@@ -93,8 +97,8 @@ TABLETOP;
 
 $tabledata = <<<TABLEDATA
 <tr>\n
-    <td style="text-align:center;$bc ">$act_obj&nbsp;</td>\n
-    <td style="text-align:center;$bc ">$use_def_obj&nbsp;</td>\n
+    <td style="text-align:center;$bc ">$act_obj</td>\n
+    <td style="text-align:center;$bc ">$udo_div$udco_div</td>\n
     <td style="$bc ">$pg_obj_type_name</td>\n
     <td style="$bc ">$pg_obj_name ($pg_obj_id)</td>\n
     <td style="$bc ">$obj_loc</td>\n
@@ -155,7 +159,7 @@ TABLEDATA;
 		echo $aoo('hidden', "name=repage;\nvalue=true");
 		echo $aoo('hidden', "name=pg_id;\nvalue={$_POST['pg_id']}");
 
-		//--2-- End of the second form
+		//"--2-- End of the second form
 		echo "</form>";
 		} # End of original post conditional
 

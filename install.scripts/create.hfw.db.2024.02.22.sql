@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 05, 2023 at 10:41 PM
--- Server version: 8.0.33-0ubuntu0.20.04.2
--- PHP Version: 7.4.3-4ubuntu2.18
+-- Generation Time: Feb 22, 2024 at 12:25 AM
+-- Server version: 8.0.36-0ubuntu0.20.04.1
+-- PHP Version: 7.4.3-4ubuntu2.19
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS ctx (
   pg_id int UNSIGNED DEFAULT NULL COMMENT 'Page specific to the context',
   pg_obj_id int UNSIGNED DEFAULT NULL COMMENT 'Page object specific to the context',
   spc_ord int UNSIGNED DEFAULT NULL COMMENT 'Manually order the entries.',
-  act_bit tinyint(1) NOT NULL DEFAULT '1' COMMENT 'True if active.',
+  act_bit BOOLEAN NOT NULL DEFAULT '1' COMMENT 'True if active.',
   PRIMARY KEY (id),
   UNIQUE KEY ctx_name (ctx_name),
   UNIQUE KEY ctx_lbl (ctx_lbl),
@@ -47,6 +47,26 @@ CREATE TABLE IF NOT EXISTS ctx (
 INSERT IGNORE INTO ctx (id, ctx_name, ctx_lbl, ctx_dsr, ctx_type_id, pg_id, pg_obj_id, spc_ord, act_bit) VALUES
 (1, 'Default Context', 'def_ctx', 'This context is required for use in the settings value table for any non-contextual value as id=1.', 30, NULL, NULL, 1, 1),
 (2, 'Default Page Context', 'def&lowbar;pg&lowbar;ctx', 'Pages with no special association&period;', 36, NULL, NULL, 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table db_meta_data
+--
+
+CREATE TABLE IF NOT EXISTS db_meta_data (
+  db_name varchar(63) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Full Database Name',
+  db_lbl varchar(63) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Database Nickname',
+  db_dsr varchar(1023) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Database description',
+  PRIMARY KEY (db_name)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Keeps track of database name';
+
+--
+-- Dumping data for table db_meta_data
+--
+
+INSERT IGNORE INTO db_meta_data (db_name, db_lbl, db_dsr) VALUES
+('Hooplafw', 'Hoopla Database 1', 'Hoopla Project Database');
 
 -- --------------------------------------------------------
 
@@ -98,7 +118,7 @@ CREATE TABLE IF NOT EXISTS pg_objs (
   obj_name varchar(63) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'ID''s object',
   obj_dsr varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Describes object',
   acs_str varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Gives access based on role to object',
-  act_bit tinyint(1) NOT NULL DEFAULT '0' COMMENT 'True if active',
+  act_bit BOOLEAN NOT NULL DEFAULT '0' COMMENT 'True if active',
   PRIMARY KEY (id),
   UNIQUE KEY unique_obj (pg_obj_type_id,obj_name),
   KEY pg_obj_type_id (pg_obj_type_id)
@@ -117,7 +137,7 @@ CREATE TABLE IF NOT EXISTS pg_obj_pg_obj_set_val_brg (
   pg_obj_set_val varchar(16000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Store the setting (property) value.',
   pg_id int UNSIGNED DEFAULT NULL COMMENT 'Stores the page id for the setting, or null if default',
   ctx_id int UNSIGNED NOT NULL DEFAULT '1' COMMENT 'An arbitrary context can be chosen in addition to the default.',
-  act_bit tinyint(1) NOT NULL COMMENT 'True = 1 if in use.',
+  act_bit BOOLEAN NOT NULL COMMENT 'True = 1 if in use.',
   PRIMARY KEY (id),
   UNIQUE KEY unique_set (pg_obj_id,pg_obj_set_type_id,pg_id,ctx_id),
   KEY secondary_index (pg_obj_id,pg_obj_set_type_id),
@@ -134,7 +154,7 @@ CREATE TABLE IF NOT EXISTS pg_obj_type_pg_obj_set_type_brg (
   id int UNSIGNED NOT NULL AUTO_INCREMENT,
   pg_obj_type_id int UNSIGNED NOT NULL,
   pg_obj_set_type_id int UNSIGNED NOT NULL,
-  act_bit tinyint(1) NOT NULL,
+  act_bit BOOLEAN NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY pg_obj_type_id (pg_obj_type_id,pg_obj_set_type_id)
 ) ENGINE=MyISAM AUTO_INCREMENT=278 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Keeps track of what settings an object type uses.';
@@ -344,7 +364,6 @@ INSERT IGNORE INTO pg_obj_type_pg_obj_set_type_brg (id, pg_obj_type_id, pg_obj_s
 (199, 48, 23, 1),
 (200, 48, 28, 1),
 (201, 8, 42, 1),
-(202, 45, 26, 0),
 (203, 45, 19, 1),
 (204, 45, 27, 1),
 (205, 45, 33, 1),
@@ -353,7 +372,6 @@ INSERT IGNORE INTO pg_obj_type_pg_obj_set_type_brg (id, pg_obj_type_id, pg_obj_s
 (208, 45, 42, 1),
 (209, 45, 22, 1),
 (210, 45, 23, 1),
-(211, 45, 24, 0),
 (212, 45, 28, 1),
 (213, 46, 19, 1),
 (214, 46, 27, 1),
@@ -380,7 +398,6 @@ INSERT IGNORE INTO pg_obj_type_pg_obj_set_type_brg (id, pg_obj_type_id, pg_obj_s
 (235, 45, 49, 1),
 (236, 46, 49, 1),
 (237, 47, 49, 1),
-(238, 50, 26, 0),
 (239, 50, 19, 1),
 (240, 50, 27, 1),
 (241, 50, 33, 1),
@@ -389,7 +406,6 @@ INSERT IGNORE INTO pg_obj_type_pg_obj_set_type_brg (id, pg_obj_type_id, pg_obj_s
 (244, 50, 42, 1),
 (245, 50, 49, 1),
 (246, 50, 23, 1),
-(247, 50, 24, 0),
 (248, 50, 22, 1),
 (249, 50, 28, 1),
 (250, 50, 51, 1),
@@ -433,8 +449,9 @@ CREATE TABLE IF NOT EXISTS pg_pg_obj_brg (
   pg_obj_id int UNSIGNED NOT NULL,
   pg_obj_loc varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Stores the variable name of the placeholder on the page.',
   spc_ord smallint DEFAULT NULL COMMENT 'For objects that coalesce',
-  use_def_bit tinyint(1) NOT NULL DEFAULT '1' COMMENT 'True if default values allowed.',
-  act_bit tinyint(1) NOT NULL,
+  use_def_bit BOOLEAN NOT NULL DEFAULT '1' COMMENT 'True if default values allowed.',
+  use_def_ctx_bit BOOLEAN NOT NULL DEFAULT '1' COMMENT 'True if the def_ctx value is the fallback.',
+  act_bit BOOLEAN NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY unique_id (pg_id,pg_obj_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Keeps track of objects on a particular page.' ROW_FORMAT=DYNAMIC;
@@ -472,7 +489,7 @@ CREATE TABLE IF NOT EXISTS `types` (
   std_type_lbl varchar(63) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used for web service communications',
   type_dsr varchar(1023) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Full type description.',
   meta_type_id int UNSIGNED NOT NULL COMMENT 'Type-types or super-types.',
-  act_bit tinyint(1) NOT NULL DEFAULT '1' COMMENT 'True if active',
+  act_bit BOOLEAN NOT NULL DEFAULT '1' COMMENT 'True if active',
   PRIMARY KEY (id),
   UNIQUE KEY std_type_lbl (std_type_lbl),
   UNIQUE KEY unique_name (meta_type_id,type_name(63)),

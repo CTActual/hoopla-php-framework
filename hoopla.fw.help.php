@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@ or implied, of Cargotrader, Inc.
 
 require_once('hoopla.fw.rel.path.php');
 
-include($classpath . "html.obj.classes.php");
+require_once($incpath . 'common.incs.php');
 
 ?>
 <!DOCTYPE html> 
@@ -56,7 +56,8 @@ include($classpath . "html.obj.classes.php");
 	<div id="site_content">		
 	
 <?php
-	include($sidepath . "std.sidebar.php");
+	include($sidepath . "std.sidebar.top.php");
+	include($sidepath . "std.sidebar.bot.php");
 ?>
 
 	  <div id="content">
@@ -71,7 +72,7 @@ include($classpath . "html.obj.classes.php");
 				pull out those values later on the real website.</li>
 			<li>We&apos;ve avoided many installation issues and headaches by not making the Hoopla GUI self-hosting.  This is just basic HTML, PHP and Javascript.</li>
 			<li>To install the database you will need to get hold of the sql installer script, give the database a proper name and then run the script in something like PHPMyAdmin.</li>
-			<li>Then you will need to make sure you have the correct connection string information in the mysqli.info.php file for both the database name and users.</li>
+			<li>Then you will need to make sure you have the correct connection string information in the default <i>hfw.mysqli.info.php</i> file for both the database name and users.  This file is in classes/info.</li>
 			<li>The Hoopla database users are created using the <i>create.hfw.usrs.sql</i> file.</li>
 			<li>If you are running into errors, you may need to set up MySQL to allow for the installers to run correctly, or you are running a version of MySQL that is too old or too new 
 				for the installers.</li>
@@ -92,29 +93,31 @@ include($classpath . "html.obj.classes.php");
 			<li>Hoopla is not really collaborative software.</li>
 			<li>In theory a small team could use Hoopla and work together over a network.</li>
 			<li>However, you would need to trust all the users; changes are not automatically displayed on the various pages; and changes are not tracked for undo purposes.</li>
-			<li>Hoopla does not manage multiple projects out of the box and because you publish each Hoopla database with the corresponding project on the production server, you should not mingle projects.</li>
-			<li>If you want to create an export tool to publish through some sort of API, that would be great, though daunting.</li>
-			<li>However, that would still make working with the UI confusing, since there is no project segregation in the UI for now.</li>
-			<li>What you probably should do is create one database per project, with each database having its own name and connection information.</li>
-			<li>Then how you manage all your projects is up to you after that.  You would have this issue regardless.</li>
+			<li>What you probably should do is create one database per project&sol;website, with each database having its own name and connection information.</li>
+			<li>The connection information for that project database would go in its own file in classes/info.  The filename should end with &quot;.php&quot;</li>
+			<li>Hoopla now handles mulitple projects&sol;databases, but you publish each Hoopla project database with the corresponding project on the production server.  You should not mingle projects in one HFW database.</li>
+			<li>Now you can use the new <b>Projects</b> selection page to select which database you'd like to connect to.  Make sure the web server can read&sol;write in the classes&sol;info folder.</li>
 			<li>The goal here is to create a simple GUI tool framework for a single developer who wants to create and manage websites easily.</li>
-			<li>The connection string to the HFW project database is stored in a file (not the project&apos;s database).  This can be a symlink (shortcut) to one of many real files, allow one to change projects through this connection.</li>
+			<li>Use the default <i>hfw.mysqli.info.php</i> connection string file in classes&sol;info as an example of how to create a new file for a new project.</li>
+			<li>If you want to create an export tool to publish to your hosting provider through some sort of API, that would be great, though daunting.</li>
 		</ul>
 		
 		<p>Creating Websites</p>
 		<ul>
-			<li>There are two parts to a Hoopla project.  The first are the PHP templates, which you create as you like and which uses the output library (exported classes and functions) on the production server.</li>
+			<li>There are three parts to a Hoopla project.  The first are the PHP templates, which you create as you like and which uses the output library (exported classes and functions) on the production server.</li>
 			<li>The second is this UI, which allows the Hoopla database to be populated and updated with the &quot;stuff&quot; needed by the template(s).</li>
+			<li>The third part is the backend software that processes requests from the template through the HFW database and project database and back to HTML generation on the server or client.</li>
 			<li>This is a low&dash;level framework and therefore very powerful and extremely flexible.</li>
 			<li>You can do all sorts of savvy things, like create a standard website for yourself that is the starting point for your projects, and then reuse it over and over.</li>
 			<li>You may end up with a catalog of starting point project websites as examples of what you can do for development.</li>
 			<li>Anything that is built up ahead of time will save time for the actual project.</li>
 			<li>You can use Hoopla to populate the final website templates to the extent you are able to abstract your needs to the framework, or very lightly, as you like.</li>
+			<li>The framework is so flexible that you can start out with a small amount of handholding and increase your reliance on it as you get more proficient.  There isn&apos;t a high hurdle to clear just to get started.</li>
 			<li>Hoopla can hold almost anything that an HTML page can need, but a balance should be struck between how much is dynamic in practice and how much is really static.</li>
 			<li>You need to decide how to mix the content in the Hoopla database with the content in your main project database.</li>
 			<li>It is not recommended that you modify the Hoopla database (adding tables and&sol;or fields) for your project since this can break things and lead to update hell.</li>
 			<li>You can change the background settings for types in the UI as you like.  You are encouraged to make both object setting (arbitrary or specific) contexts and page contexts as needed for your project.</li>
-			<li>You might be coordinating several databases in your project.  What Hoopla can store are things like connection strings and queries that deal with those other databases.</li>
+			<li>You might be coordinating several databases in your project.  A HFW database can store are things like connection strings and queries that deal with those other databases.</li>
 			<li><b>Hoopla is not the best content management system.</b></li>
 			<li>You might be tempted to use Hoopla for content management, but that is probably a mistake since it is statically published and read only.</li>
 			<li>Think of Hoopla as something you can use to create a content management system (CMS) instead.</li>
@@ -129,7 +132,7 @@ include($classpath . "html.obj.classes.php");
 			<li style="list-style-type:none;">Hoopla Output Library files&#8212;generally in their own directory&#8212;and installer scripts for any databases and users the project needs.</li>
 			<li>This GUI should not be part of that install.</li>
 			<li>You will probably have a testing version of your project locally so you can see it all come together and fix any issues that arise before publishing.</li>
-			<li>It&apos;s not recommended, but you can install as many copies of this GUI as you like locally for handling multiple projects at once, with the requisite deference to housekeeping that will entail.</li>
+			<li>This new for 2024 version can handle multiple projects through one GUI as long as the database connection files follow a convention.</li>
 			<li>Installer scripts are often generated using tools like PHPMyAdmin, which have export sql commands built into their UIs.  It&apos;s not something available yet through this GUI.</li>
 			<li>Production server environments are rarely identical to local development server environments.  This may mean that code that works locally will not work when published.</li>
 			<li>This is often painfully true with things like PHP error handling, UTF-8 support, MySQL collation issues and file paths.</li>
@@ -145,6 +148,7 @@ include($classpath . "html.obj.classes.php");
 			<li>You can certainly create more if you like.  Once you are familiar with how the Hoopla database works, you can easily expand on the functions and classes.</li>
 			<li>The stock functions will help you retrieve information out of the Hoopla database, but parsing this information and outputting it to generate HTML is up to your template and project PHP libraries.</li>
 			<li>You will need to make sure that the connection string information on the exported hfw.db.info.php file is correct, and file paths are well understood.</li>
+			<li>We have revamped the two most important library calls for 2024.  They are mostly backwards compatible, but may cause some problems if you update.</li>
 			<li><div class="button_link"><a href="help/hoopla.fw.help.export.lib.php">Export Library Help</a></div></li>
 		</ul>
 		
@@ -162,8 +166,7 @@ include($classpath . "html.obj.classes.php");
 			<li>Or some change in the layout that requires an update.</li>
 			<li><b>Tempting as it is to put this UI on the production server, it is not recommened for security reasons.</b></li>
 			<li>The exported library code is safe to use on a production server, since it does not do updates or deletes,</li>
-			<li><b>But the UI code has no innate security features for use on a production server; and you will need to handle data</b></li>
-			<li><b>Encryption and other data security in your main application.</b></li>
+			<li><b>But the UI code has no innate security features for use on a production server; and you will need to handle data encryption and other data security in your main application.</b></li>
 			<li>Nothing prevents the main application from making direct changes to the production server Hoopla DB,</li>
 			<li>But any local version will then be out of sync with the production version.</li>
 		</ul>
@@ -177,6 +180,16 @@ include($classpath . "html.obj.classes.php");
 			<li>As the Hoopla dev team is quite small, and the database already extremely abstract, there aren&apos;t a lot of changes to the database envisioned.</li>
 			<li>Changes to the UI are more likely, though not likely to break anything.</li>
 			<li>Changes to the export library are not likely to break anything, but that can&apos;t be guaranteed.</li>
+			<li><b>Changes for 2024:</b></li>
+			<ol>
+				<li>There is a new <b>db_meta_data</b> table in the database.  An install script is provided.  This is needed for handling multiple projects in a nice way.</li>
+				<li>In addition to &quot;1&quot; above, there is a new <b>Projects</b> page in the UI for selecting the current working project on your desktop.</li>
+				<li>There is a new field in the <b>pg_pg_obj_brg</b> table: <b>use_def_ctx_bit</b>, which allows users to fallback to the <b>def_ctx</b> when the requested context has no value.</li>
+				<li>As per above, the UI now reflects this new field and allows users to make the necessary setting changes for <b>use_def_ctx_bit</b>.</li>
+				<li>As per above again, the export library calls for retrieving values and context values now reflect the use of <b>use_def_ctx_bit</b> and have been revamped.  Behavior might be slightly different from before and things could break, requiring passing extra parameters to these calls or changing the default settings on an object.  For example, <b>hfw_return_value, hfwn_return_value, hfw_get_ctx_vals </b>and <b>hfwn_get_ctx_vals</b> all have <b>$get_def_bit</b> as an input param and would be affected by this change.</li>
+				<li>Further: some of these calls now output the <b>use_def_ctx_bit</b> value.</li>
+				<li> Now users can change the ordering of pages on <b>Pages</b> UI page, instead of going through <b>Values-by-Object</b> as before.</li>
+			</ol>
 		</ul>
 		
 		  <div class="content_container">

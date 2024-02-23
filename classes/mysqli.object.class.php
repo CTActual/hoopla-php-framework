@@ -1,7 +1,7 @@
 <?php
 
 /*
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -361,7 +361,9 @@ class mysqli_obj
 		// This is an obscure use case, but needed for backwards compatibility
 		if ($this->mysqli_local == false)
 		{
-			$GLOBALS = $GLOBALS + $this->mysqli_col;
+			// This is an old feature for backwards compat
+			foreach ($this->mysqli_col as $mckey=>$mcval)
+				{$GLOBALS[$mckey] = $mcval;}
 			$this->mysqli_col = array();
 			}
 

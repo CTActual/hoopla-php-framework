@@ -28,8 +28,8 @@
 
 		<div class="sidebar">
           <div class="sidebar_item">
-            <h2>Allow Defaults</h2>
-            <p>Turn off to prevent default values from being returned on a given page.</p>         
+            <h2>Fallbacks for PG and CTX</h2>
+            <p>When selected, in the absence of a page specific or ctx specific value, the default value (for any page or for the default context def_ctx) will be used instead.</p>         
 		  </div><!--close sidebar_item--> 
         </div><!--close sidebar-->  		
 

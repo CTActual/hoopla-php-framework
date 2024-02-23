@@ -3,7 +3,7 @@
           <ul id="nav">
 <?php
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -31,8 +31,8 @@ or implied, of Cargotrader, Inc.
 */
 
 	$d = $commonpath . 'hoopla.fw.create.';
-	$nav_array = array('Home', 'Pages', 'Objects', 'Assignment', 'Values-by-Page', 'Values-by-Object', 'Contexts', 'Types', 'Object-Type-Settings', 'Help');
-	$href_array = array($commonpath . 'index.php', $d . 'pgs.php', $d . 'pg.objs.php', $d . 'pg.pg.obj.brg.php', $d . 'pg.obj.val.by.pg.php', $d . 'pg.obj.val.by.obj.php', $d . 'contexts.php', $d . 'types.php', $d . 'pg.obj.set.brg.php', $commonpath . 'hoopla.fw.help.php');
+	$nav_array = array('Home', 'Projects', 'Pages', 'Objects', 'Assignment', 'Values-by-Page', 'Values-by-Object', 'Contexts', 'Types', 'Object-Type-Settings', 'Help');
+	$href_array = array($commonpath . 'index.php', $commonpath . 'hoopla.fw.select.prj.php', $d . 'pgs.php', $d . 'pg.objs.php', $d . 'pg.pg.obj.brg.php', $d . 'pg.obj.val.by.pg.php', $d . 'pg.obj.val.by.obj.php', $d . 'contexts.php', $d . 'types.php', $d . 'pg.obj.set.brg.php', $commonpath . 'hoopla.fw.help.php');
 	$lis = array();
 
 	foreach ($nav_array as $key=>$link)

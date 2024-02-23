@@ -1,5 +1,5 @@
-		The Hoopla PHP Framework
-===============================
+<pre><h1 style="text-align:center; background-color:ivory;">The Hoopla PHP Framework</h1></pre>
+* * *
 
 The **Hoopla PHP Framework** is a low-level programming framework and environment (HTML IDE) designed to meta-contextualize web application code when written primarily in PHP, HTML, Javascript, CSS and SQL.
 
@@ -13,7 +13,7 @@ Exported classes written in PHP allow the published code access to the back-end 
 
 The level of code abstraction is such that several powerful features are available:
 
-1. 	Object reuse with page values and/or arbitrary context values.
+1.  Object reuse with page values and/or arbitrary context values.
 2.  Page spanning object set recall with contextual values.
 3.  Pages work with templates, normally many-to-one, though many-to-many is conceivable.
 4.  All objects and values are organized by a type system.
@@ -21,9 +21,9 @@ The level of code abstraction is such that several powerful features are availab
 6.  The exported functions are easy to learn.
 
 
-===============================
-		Installation
-===============================
+
+# Installation #
+* * *
 
 Please consult the INSTALLATION file for more details.
 
@@ -38,18 +38,17 @@ The following steps serve as an outline:
 7.  Make sure your application pages can connect with the Hoopla database.
 
 
-===============================
-		Help
-===============================
+
+# Help #
+***
 
 The IDE comes with extensive help pages on how to use the framework.  There should also be a sample application you can get from our repo.
 
 
-===============================
-		License
-===============================
+# License #
+***
 
-Copyright 2009-2023 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:

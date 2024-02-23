@@ -1,6 +1,5 @@
-===============================
-Hoopla Framework Installation Instructions
-===============================
+<pre><h1 style="text-align:center; background-color:ivory;">Hoopla Framework Installation Instructions</h1></pre>
+* * *
 
 The following steps serve as an outline (details to follow):
 
@@ -13,9 +12,8 @@ The following steps serve as an outline (details to follow):
 7.  Make sure your application pages can connect with the Hoopla database.
 
 
-===============================
-		System Requirements
-===============================
+# System Requirements #
+* * *
 
 Any local server that can handle PHP 5.6+ and MySQL 5.3+ should be able to install the IDE and database.
 PHP versions 7+ recommended, and MySQL 8.0+ recommended.
@@ -24,9 +22,8 @@ Please read the detail installation instructions for caveats.
 Future updates might require a change in the hosting environment.
 
 
-===============================
-		Detailed Installation Instructions
-===============================
+# Detailed Installation Instructions #
+* * *
 
 1. Set up a local PHP and MySQL web (HTTP) server for installing the framework IDE and developing the web application.
 
@@ -57,9 +54,9 @@ the work of designing the website does not have to be on the same machine as the
 
 	We recommend changing the passwords to something other than the defaults, since anyone using the default would essentially have a non-secret set of passwords.
 
-	Any changes to the passwords and/or user names need to be reflected in the connection string file "mysqli.info.php" in the "classes" folder, which is needed by the IDE.
+	Any changes to the passwords and/or user names need to be reflected in the connection string file "hfw.mysqli.info.php" in the "classes/info" folder, which is needed by the IDE.
 
-	The "hfw.export.lib" folder contains the default connection string file "hfw.db.info.php" (which would also need to track any password or user name changes). One should create both local and server versions of this file with different passwords for security.
+	The "hfw.export.lib" folder also contains a default connection string file "hfw.db.info.php", which would also need to track any password or user name changes. One should create both local and server versions of this file with different passwords for security.  This is used by the actual production application to connect to the HFW database and needs the same connection info as the GUI connection string file in "classes/info".  However, the GUI will not need a production server version of the file "hfw.mysqli.info.php".
 
 	We provide create MySQL user scripts for "localhost", though you can swap that out with "127.0.0.1" as you see fit.  If your MySQL settings use something else, then these will need modification.  You can install both or just the most appropriate set.
 
@@ -67,7 +64,7 @@ the work of designing the website does not have to be on the same machine as the
 
 3. Install the Hoopla Web IDE pages in a local web folder.
 
-	Once you have carved out a web folder on the local server for the IDE--the IDE is not installed on the production server--you will need to install all the files in this repo except for the ones in the "install" and "hfw.export.lib" folders and all root folder PHP files and no non-PHP pages from the root folder (if any) except favicon.ico if you like it.
+	Once you have carved out a web folder on the local server for the IDE--the IDE is not installed on the production server--you will need to install all the files in this repo except for the ones in the "install" and "hfw.export.lib" folders and install all root folder PHP files and no non-PHP pages except favicon.ico if you like it.
 
 	These will go in the document root of the IDE website on your local server.  This may also be an alias folder in parallel with other projects.
 
@@ -75,13 +72,13 @@ the work of designing the website does not have to be on the same machine as the
 
 	Don't mix these files with your project files or other websites on the local server.  They should go cleanly in their own folder.
 
-	If PHP is working properly, you should be able to at least see the help pages in the IDE with proper formatting in your favorite browser.
+	If PHP is working properly, you should be able to at least see the help pages in the IDE with proper formatting in your favorite browser once your web server settings can see the HFW GUI folder correctly (and probably restarted).
 
 4. Make sure the Hoopla Web IDE pages can connect with the local Hoopla database.
 
 	If the IDE pages that connect to the database work, and the default information is displayed, then the IDE should be working.
 
-	If you get an error message, you may need to recheck your installation, making sure that MySQL is installed correctly and the connection string information is correct. The connection string file "mysql.info.php" is typically a symlink to a real file the "classes/info" folder.  Doing this allows one to have multiple projects on the same machine, accessed one-at-a-time by changing the symlink.  However, if the symlink did not copy over correctly then recreate it from the "classes/info" folder into the "classes" folder, making sure the link name (not necessarily the original file name) is "mysql.info.php", which is required by the database connection class.
+	If you get an error message, you may need to recheck your installation, making sure that MySQL is installed correctly and the connection string information is correct. The file "classes/mysqli.info.php" is pulls in "classes/info/hfw.mysqli.info.php", the default connection string file.  New for 2024, you can add more connection string files to "classes/info" and then select the appropriate file under "Projects" in the GUI to change projects.  This will entail the server copying files over to the "classes/info" folder, so the web server must have write permissions to that folder.  All connection string files must end with ".php".  If you put other files in the "classes/info" folder (not recommended), make sure they don't end with ".php".
 
 	The easiest test is to go to the "Types" page, where at the very least the list of meta-types will be shown in the dropdown box.  Clicking on the "Select Meta Type" button should load the types of the default meta-type for display.
 
@@ -93,7 +90,7 @@ the work of designing the website does not have to be on the same machine as the
 
 	You will most likely be using the Hoopla Framework on one or more PHP-based projects, each of which should get their own distinct installation folder on the local server.
 
-	You can save multiple connection string files in a folder in the IDE and then link (create a symlink) to the classes folder as "mysqli.info.php" as needed, though one project at a time.
+	You can save multiple connection string files in the "classes/info" GUI/IDE folder and then select among them in the GUI under "Projects".  This requires that the web server have write permissions to "classes/info".
 
 	Since your project is likely to be initially blank, you may wish to create a simple index.html and then index.php to verify that at least something is set up properly before proceeding.
 
@@ -122,3 +119,7 @@ the work of designing the website does not have to be on the same machine as the
 8. Make use of the sample application from our repo
 
 	You should find a sample application that uses the framework available on our repo.  This will guide you on how the framework "works".
+
+9. New for 2024
+
+	We have added a field to the HFW database table "pg_pg_obj_brg" called "use_def_ctx_bit".  There is a file in the "install.scripts" folder, "update.hfw.db.for.2024.sql" that should be run on older databases only to update them to the latest structure.  This new field and changes in the export library framework classes might result in changes in the behavior of previously created projects and they will need to be tested before any production changes are applied.  The same script also adds a new table to the database needed for new multi-project feature to run correctly.  So, running "update.hfw.db.for.2024.sql" in PHPMyAdmin or on the MySQL command line will make both updates.  The new 2024 version will not require this script to be run.

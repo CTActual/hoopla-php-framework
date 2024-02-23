@@ -1,7 +1,7 @@
 <?php
 
 /*
-Copyright 2009-2022 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -64,10 +64,10 @@ function get_pg_obj_list($type_id=null)
 	Order By obj_name";
 
 	return tcol_pattern($obj_sql, 'i', array('id'=>$type_id), array(	'obj_name', 
-																					'obj_dsr', 
-																					'acs_str', 
-																					'obj_id', 
-																					'act_bit') );
+																							'obj_dsr', 
+																							'acs_str', 
+																							'obj_id', 
+																							'act_bit') );
 	}
 
 //____________________________________________________________________________________
@@ -79,11 +79,12 @@ function get_full_pg_obj_list($flatten=true)
 	$obj_sql = "Select pg_objs.obj_name, 
 		pg_objs.pg_obj_type_id, 
 		types.type_name, 
+		types.std_type_lbl, 
 		types.spc_ord, 
 		pg_objs.obj_dsr, 
 		pg_objs.acs_str, 
 		pg_objs.id, 
-		CONCAT_WS('', obj_name, ' (', pg_objs.id, '), ', type_name, ' &mdash; ', obj_dsr) as list 
+		CONCAT_WS('', obj_name, ' (', pg_objs.id, '), ', type_name, ' (', std_type_lbl, ') &mdash; ', obj_dsr) as list 
 	From pg_objs, 
 		types 
 	Where pg_objs.act_bit and 
@@ -94,13 +95,14 @@ function get_full_pg_obj_list($flatten=true)
 		pg_objs.obj_name";
 
 	return col_pattern($obj_sql, null, null, array(	'obj_name', 
-																'obj_type_id', 
-																'obj_type_name', 
-																'obj_type_spc_ord', 
-																'obj_dsr', 
-																'acs_str', 
-																'obj_id', 
-																'obj_list_lbl'), $flatten);
+																		'obj_type_id', 
+																		'obj_type_name', 
+																		'obj_type_lbl', 
+																		'obj_type_spc_ord', 
+																		'obj_dsr', 
+																		'acs_str', 
+																		'obj_id', 
+																		'obj_list_lbl'), $flatten);
 	}
 
 //____________________________________________________________________________________
@@ -130,20 +132,21 @@ function create_pg_obj($obj_type_id=null, $obj_name=null, $obj_dsr=null, $acs_st
 	Values (?, ?, ?, ?, true)";
 
 	$bind_array_3 = array(	'pg_obj_type_id'=>(int) $obj_type_id, 
-									'obj_name'=>mb_prepstr($obj_name, 63), 
-									'obj_dsr'=>mb_prepstr($obj_dsr, 255), 
-									'acs_str'=>mb_prepstr($acs_str, 255) );
+										'obj_name'=>mb_prepstr($obj_name, 63), 
+										'obj_dsr'=>mb_prepstr($obj_dsr, 255), 
+										'acs_str'=>mb_prepstr($acs_str, 255) );
 
 	return ins_pattern($insert_sql, 'isss', $bind_array_3);
 	}
 
 //____________________________________________________________________________________
-function copy_pg_objs($pg_id=null, $pg_obj_id=null, $pg_loc=null, $spc_ord=null, $use_def_bit=true)
+function copy_pg_objs($pg_id=null, $pg_obj_id=null, $pg_loc=null, $spc_ord=null, $use_def_bit=true, $use_dcb=true)
 {
 	if (!check_index($pg_id) || !check_index($pg_obj_id) ) {return null;}
 	if (!check_index($spc_ord) ) {$spc_ord = null;}
 	if (empty($pg_loc) ) {$pg_loc = null;}
 	$use_def_bit = force_boolean($use_def_bit, true);
+	$use_dcb = force_boolean($use_dcb, true);	// def_ctx_bit
 
 	# Copy objects from one page to another
 	$insert_copy_sql = "Insert Into pg_pg_obj_brg 
@@ -152,17 +155,19 @@ function copy_pg_objs($pg_id=null, $pg_obj_id=null, $pg_loc=null, $spc_ord=null,
 		pg_obj_loc, 
 		spc_ord, 
 		use_def_bit, 
+		use_def_ctx_bit, 
 		act_bit) 
-	Values (?, ?, ?, ?, ?, true) 
+	Values (?, ?, ?, ?, ?, ?, true) 
 	ON DUPLICATE KEY UPDATE act_bit = true";
 
 	$bind_array_5 = array(	'pg_id'=>(int) $pg_id, 
-									'pg_obj_id'=>$pg_obj_id, 
-									'loc'=>$pg_loc, 
-									'so'=>$spc_ord,  
-									'udb'=>$use_def_bit);
+										'pg_obj_id'=>$pg_obj_id, 
+										'loc'=>$pg_loc, 
+										'so'=>$spc_ord,  
+										'udb'=>$use_def_bit, 
+										'udcb'=>$use_dcb);
 
-	return ins_pattern($insert_copy_sql, 'iisii', $bind_array_5);
+	return ins_pattern($insert_copy_sql, 'iisiii', $bind_array_5);
 	}
 
 //____________________________________________________________________________________
@@ -240,14 +245,15 @@ function pg_obj_type_list($flatten=true, $exclude_pgs=true)
 	}
 
 //____________________________________________________________________________________
-function update_pg_pg_obj_brg($pg_id=null, $pg_obj_id=null, $obj_loc=null, $spc_ord=null, $tf=true, $udb=true)
+function update_pg_pg_obj_brg($pg_id=null, $pg_obj_id=null, $obj_loc=null, $spc_ord=null, $tf=true, $udb=true, $udcb=true)
 {
 	$result1 = update_obj_loc($pg_id, $pg_obj_id, $obj_loc);
 	$result2 = update_obj_spc_ord($pg_id, $pg_obj_id, $spc_ord);
 	$result3 = set_pg_pg_obj_brg_act_bit($pg_id, $pg_obj_id, $tf);
 	$result4 = set_pg_pg_obj_brg_use_def_bit($pg_id, $pg_obj_id, $udb);
+	$result5 = set_pg_pg_obj_brg_use_def_ctx_bit($pg_id, $pg_obj_id, $udcb);
 
-	return array($result1, $result2, $result3, $result4);
+	return array($result1, $result2, $result3, $result4, $result5);
 	}
 
 //____________________________________________________________________________________
@@ -306,7 +312,7 @@ function set_pg_pg_obj_brg_use_def_bit($pg_id=null, $pg_obj_id=null, $tf=true)
 	if (!check_index($pg_id) || !check_index($pg_obj_id) ) {return null;}
 	$tf = force_boolean($tf, true);
 
-	# Set all bridge records to false before final update
+	# Update use_def_bit value
 	$update_sql = "Update pg_pg_obj_brg 
 	Set use_def_bit = ? 
 	Where pg_id = ? and 
@@ -328,6 +334,39 @@ function set_pg_pg_obj_brg_use_def_bit_false($pg_id=null, $exclude_pgs=true)
 	Set use_def_bit = false 
 	Where pg_id = ? and 
 		use_def_bit = true $extra";
+
+	return ins_pattern($update_sql, 'i', array('id'=>$pg_id) );
+	}
+
+//____________________________________________________________________________________
+//____________________________________________________________________________________
+function set_pg_pg_obj_brg_use_def_ctx_bit($pg_id=null, $pg_obj_id=null, $tf=true)
+{
+	if (!check_index($pg_id) || !check_index($pg_obj_id) ) {return null;}
+	$tf = force_boolean($tf, true);
+
+	# Update use_def_ctx_bit value
+	$update_sql = "Update pg_pg_obj_brg 
+	Set use_def_ctx_bit = ? 
+	Where pg_id = ? and 
+		pg_obj_id = ?";
+
+	return ins_pattern($update_sql, 'iii', array('bit'=>$tf, 'pg'=>$pg_id, 'obj'=>$pg_obj_id) );
+	}
+
+//____________________________________________________________________________________
+function set_pg_pg_obj_brg_use_def_ctx_bit_false($pg_id=null, $exclude_pgs=true)
+{
+	if (!check_index($pg_id) ) {return null;}
+	$exclude_pgs = force_boolean($exclude_pgs, true);
+
+	if ($exclude_pgs) {$extra = "and pg_obj_id Not IN (Select pg_obj_id From pgs) ";} else {$extra = "";}
+
+	# Set all bridge records to false before final update
+	$update_sql = "Update pg_pg_obj_brg 
+	Set use_def_ctx_bit = false 
+	Where pg_id = ? and 
+		use_def_ctx_bit = true $extra";
 
 	return ins_pattern($update_sql, 'i', array('id'=>$pg_id) );
 	}
@@ -446,6 +485,7 @@ function get_obj_pg_list($obj_id=null)
 		ppob.pg_obj_loc, 
 		ppob.spc_ord, 
 		ppob.use_def_bit, 
+		ppob.use_def_ctx_bit, 
 		ppob.act_bit 
 	From pg_objs as po, 
 		pg_pg_obj_brg as ppob, 
@@ -457,7 +497,10 @@ function get_obj_pg_list($obj_id=null)
 		ppob.act_bit 
 	Order By po.obj_name";
 
-	return tcol_pattern($sql, 'i', array('id'=>$obj_id), array('pg_id', 'pg_obj_id', 'pg_name', 'pg_dsr', 'pg_acs_str', 'pg_act_bit', 'obj_loc', 'ppob_spc_ord', 'ppob_use_def_bit', 'ppob_act_bit') );
+	$output = array('pg_id', 'pg_obj_id', 'pg_name', 'pg_dsr', 'pg_acs_str', 'pg_act_bit', 'obj_loc', 
+							'ppob_spc_ord', 'ppob_use_def_bit', 'ppob_use_def_ctx_bit', 'ppob_act_bit');
+	
+	return tcol_pattern($sql, 'i', array('id'=>$obj_id), $output);
 	}
 //____________________________________________________________________________________
 function clone_pg_objs($src_pg_id=null, $dst_pg_id=null)
@@ -471,12 +514,14 @@ function clone_pg_objs($src_pg_id=null, $dst_pg_id=null)
 		pg_obj_loc, 
 		spc_ord, 
 		use_def_bit, 
+		use_def_ctx_bit, 
 		act_bit) 
 	Select ?, 
 		pg_obj_id, 
 		pg_obj_loc, 
 		spc_ord, 
 		use_def_bit, 
+		use_def_ctx_bit, 
 		true 
 	From pg_pg_obj_brg 
 	Where pg_id = ? and 
@@ -497,6 +542,21 @@ function det_use_def_bit($obj_id=null, $pg_id=null)
 
 	# Get the use_def_bit value
 	$sql = "Select use_def_bit From 
+				pg_pg_obj_brg 
+			Where pg_id = ? and 
+				pg_obj_id = ? 
+			Limit 1";
+
+	return row_pattern($sql, 'ii', array('pg'=>$pg_id, 'obj'=>$obj_id), array('bit') );
+	}
+
+//____________________________________________________________________________________
+function det_use_def_ctx_bit($obj_id=null, $pg_id=null)
+{
+	if (!check_indexes(array($obj_id, $pg_id) ) ) {return null;}
+
+	# Get the use_def_ctx_bit value
+	$sql = "Select use_def_ctx_bit From 
 				pg_pg_obj_brg 
 			Where pg_id = ? and 
 				pg_obj_id = ? 
