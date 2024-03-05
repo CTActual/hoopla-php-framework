@@ -12,7 +12,7 @@ Use the **Hoopla Framework** to create your websites.
 
 It relies on some 3<sup>rd</sup> party HTML, JS and CSS.  See copyright and license information within each file.
 
-<pre><a href="https://www.hooplaframework.com">The Hoopla Framework Website!</a></pre>
+<pre><div style="text-align:center;"><a style="font-size: 16px; font-weight: bold;" href="https://www.hooplaframework.com">The Hoopla Framework Website!</a></div></pre>
 
 ![Hoopla Diagram](hfw.diagram.trp.png "Framework Diagram")
 
