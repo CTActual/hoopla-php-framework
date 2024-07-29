@@ -2013,10 +2013,10 @@ function automatic_obj_array($type=null, $obj_array=array(), $alt=";\n")
 	return $output;
 	}	# End of automatic_obj_array
 // ____________________________________________________________________________________________________
-function handle_e_string($str=null, $split='||', $alt=';\n')
+function handle_e_string($str=null, $split='||', $alt=";\n")
 {
-	if (empty($alt) ) {$alt = ';\n';}
-	if (empty($split) ) {$split = ';\n';}
+	if (empty($alt) ) {$alt = ";\n";}
+	if (empty($split) ) {$split = ";\n";}
 	
 	$a = (!empty($str) ) ? explode($split, $str, 2) : array();
 	$innerstr = null;
@@ -2120,7 +2120,7 @@ function ecore_object_output($str=null)
 // ____________________________________________________________________________________________________
 //											Misc. Functions
 // ____________________________________________________________________________________________________
-function prepstr($input, $length=null)
+function prepstr($input=null, $length=null)
 {
 	if ($length !== NULL && is_numeric($length) && $length > 0)
 		{return htmlentities(substr(trim($input), 0, $length), ENT_QUOTES | ENT_HTML5, "UTF-8", false);}
@@ -2129,7 +2129,7 @@ function prepstr($input, $length=null)
 	}
 
 // ____________________________________________________________________________________________________
-function prepstr2($input, $length=null)
+function prepstr2($input=null, $length=null)
 {
 	if ($length !== NULL && is_numeric($length) && $length > 0)
 		{return htmlspecialchars(substr(trim($input), 0, $length), ENT_QUOTES | ENT_HTML5, "UTF-8", false);}
@@ -2138,7 +2138,7 @@ function prepstr2($input, $length=null)
 	}
 
 // ____________________________________________________________________________________________________
-function mb_prepstr($input, $length=null)
+function mb_prepstr($input=null, $length=null)
 {
 	if ($length !== NULL && is_numeric($length) && $length > 0)
 		{return htmlentities(mb_substr(trim($input), 0, $length), ENT_QUOTES | ENT_HTML5, "UTF-8", false);}
@@ -2147,7 +2147,7 @@ function mb_prepstr($input, $length=null)
 	}
 
 // ____________________________________________________________________________________________________
-function mb_prepstr2($input, $length=null)
+function mb_prepstr2($input=null, $length=null)
 {
 	if ($length !== NULL && is_numeric($length) && $length > 0)
 		{return htmlspecialchars(mb_substr(trim($input), 0, $length), ENT_QUOTES | ENT_HTML5, "UTF-8", false);}
@@ -2156,13 +2156,13 @@ function mb_prepstr2($input, $length=null)
 	}
 
 // ____________________________________________________________________________________________________
-function html_entity_decodes($input)
+function html_entity_decodes($input=null)
 {
 	return html_entity_decode($input, ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
 	}
 
 // ____________________________________________________________________________________________________
-function html_entity_decodes_iso($input)
+function html_entity_decodes_iso($input=null)
 {
 	// If you need re-encode into UTF-8 From ISO-8859-1
 	return mb_convert_encoding(html_entity_decode($input, ENT_NOQUOTES | ENT_HTML5, 'ISO-8859-1'), 'UTF-8', 'ISO-8859-1');

@@ -32,47 +32,48 @@ or implied, of Cargotrader, Inc.
 
 class mysqli_obj
 {
-	public $mysqli_con_fo;		# the actual connection object to the database
-	public $mysqli_con_bool;		# returns true or false if there is a connection
-	public $mysqli_con_err;		# returns string of the error message, if any, for the connection
-	public $mysqli_local=false;	# use a class var instead of a global for output
+	public $mysqli_con_fo;					# the actual connection object to the database
+	public $mysqli_con_bool;				# returns true or false if there is a connection
+	public $mysqli_con_err;					# returns string of the error message, if any, for the connection
+	public $mysqli_local=false;				# use a class var instead of a global for output
 
 	public $mysqli_qry;								# is the string for the sql query
 	public $mysqli_qry_type;						# First word from the sql query
-	private $mysqli_do_store_result_bool;	# stores true or false if a store_result command is needed
+	private $mysqli_do_store_result_bool;		# stores true or false if a store_result command is needed
 
-	public $mysqli_stmt_fo;		# the actual prepared statement
-	public $mysqli_stmt_bool;	# returns true or false if there is a prepared statement
-	public $mysqli_stmt_err;		# returns string of the error message, if any, for the prepared connection
+	public $mysqli_stmt_fo;					# the actual prepared statement
+	public $mysqli_stmt_bool;				# returns true or false if there is a prepared statement
+	public $mysqli_stmt_err;				# returns string of the error message, if any, for the prepared connection
 	public $mysqli_stmt_param_count;	# returns the number of parameters that are contained in the prepared connection
 
 	public $mysqli_bind_types_str;			# the allowed type string for binding statements
 	public $mysqli_bind_array = array();	# the array of variables to bind the statement to
-	public $mysqli_bind_stmt_str;			# the string of the binding php statement
-	public $mysqli_bind_bool;				# returns true if the stmt was bound
+	public $mysqli_bind_stmt_str;				# the string of the binding php statement
+	public $mysqli_bind_bool;					# returns true if the stmt was bound
 	public $mysqli_bind_err;					# returns the error message, if any, from binding
 
 	public $mysqli_exec_result_bool;		# returns true or false if there is a valid result
-	public $mysqli_exec_result_err;			# returns the error string, if any, for the result
+	public $mysqli_exec_result_err;		# returns the error string, if any, for the result
 	public $mysqli_exec_row_count;		# returns the number of rows affected by the execution of the statement (update/insert)
 	public $mysqli_exec_num_rows;		# returns the number of rows in the result stored variable (select)
 	public $mysqli_exec_meta_data;		# returns the official meta data of the statement after execution
 
 	public $mysqli_store_result_bool;		# stores true if results were stored
 
-	public $mysqli_bind_result_array = array();	# the array of variables to bind the results to
-	public $mysqli_output = array();				# the local output variable
-	public $mysqli_col = array();						# the local output variable for fetch columns
-	public $mysqli_bind_result_bool;				# stored true if results were bound
-	public $mysqli_bind_result_stmt;				# the string for binding the php statement
-	public $mysqli_bind_result_err;					# returns the error message, if any, from binding
-	public $mysqli_bind_result_allow_bool;		# flag for blocking multi-bind calls
-	public $mysqli_fetch_bool;						# returns the boolean for fetching results
-	public $mysqli_goto_bool;						# returns the goto boolean
-	public $mysqli_insert_id;							# returns the id of the last insert (if any)
-	public $mysqli_start_time;						# performance testing
-	public $mysqli_report;								# diagnostics results
-	public $mysqli_classpath;							# the classpath variable value
+	public $mysqli_bind_result_array = array();		# the array of variables to bind the results to
+	public $mysqli_bind_result_bool;						# stored true if results were bound
+	public $mysqli_bind_result_stmt;						# the string for binding the php statement
+	public $mysqli_bind_result_err;						# returns the error message, if any, from binding
+	public $mysqli_bind_result_allow_bool;			# flag for blocking multi-bind calls
+
+	public $mysqli_output = array();						# the local output variable
+	public $mysqli_col = array();							# the local output variable for fetch columns
+	public $mysqli_fetch_bool;								# returns the boolean for fetching results
+	public $mysqli_goto_bool;								# returns the goto boolean
+	public $mysqli_insert_id;								# returns the id of the last insert (if any)
+	public $mysqli_start_time;								# performance testing
+	public $mysqli_report;									# diagnostics results
+	public $mysqli_classpath;								# the classpath variable value
 
 	// We automatically connect to the database during the construct
 
@@ -81,8 +82,6 @@ class mysqli_obj
 		global $classpath;
 
 		$this->mysqli_start_time = microtime(true);
-		$this->mysqli_con_fo = new mysqli();
-		$this->mysqli_con_fo->init();
 		$this->mysqli_classpath = $classpath;
 		
 		if ($local) {$this->mysqli_local = true;}
@@ -94,7 +93,9 @@ class mysqli_obj
 		// We check that $classpath actually found a file and created $dsn
 		if (isset($dsn) && is_array($dsn) ) 
 		{
-			$this->mysqli_con_fo->real_connect($dsn['hostspec'], $dsn['username'], $dsn['password'], $dsn['database'], $dsn['port'], $dsn['socket'], $dsn['flags']);
+			$this->mysqli_con_fo = new mysqli();
+			$this->mysqli_con_fo->__construct();
+			$this->mysqli_con_fo->real_connect($dsn['hostspec'], $dsn['username'], $dsn['password'], $dsn['database'], $dsn['port'], $dsn['socket'], (int) $dsn['flags']);
 
 			$this->mysqli_con_bool = true;
 
@@ -486,7 +487,7 @@ class mysqli_obj
 
 	function report($html=true)
 	{
-		$query_str = ($html) ? nl2br($this->mysqli_qry, false) : $this->mysqli_qry;
+		$query_str = ($html) ? str_replace(array("\n", "\n\r", "\r", "\r\n"), array("<br>"), $this->mysqli_qry) : $this->mysqli_qry;
 		$mt = 'microtime';
 		$bind_str = "";
 
@@ -497,7 +498,7 @@ class mysqli_obj
 			}
 			
 		if ($html)
-			{$bind_str = "<br>" . substr(nl2br($bind_str, false), 0, -4);}
+			{$bind_str = "<br>" . substr(str_replace(array("\n", "\n\r", "\r", "\r\n"), array("<br>"), $bind_str), 0, -4);}
 		else
 			{$bind_str = substr($bind_str, 0, -2);}
 
@@ -608,27 +609,58 @@ TABLE;
 
 		} # End of report function
 
-	function __Destruct()
+	function __destruct()
 	{
+		if ($this->mysqli_con_bool) {$this->mysqli_con_fo->close();}
+		
+		$this->mysqli_con_fo = null;
 		$this->mysqli_con_bool = null;
-		$this->mysqli_stmt_bool = null;	
-		$this->mysqli_do_store_result_bool = null;
-		$this->mysqli_bind_bool = null;
-		$this->mysqli_exec_result_bool = null;
-		$this->mysqli_store_result_bool = null;
-		$this->mysqli_stmt_param_count = null;
-		$this->mysqli_bind_result_allow_bool = null;
-		$this->mysqli_bind_array = null;
-		$this->mysqli_bind_result_array = null;
+		$this->mysqli_con_err = null;
+		$this->mysqli_local = null;
+
 		$this->mysqli_qry = null;
+		$this->mysqli_qry_type = null;
+		$this->mysqli_do_store_result_bool = null;
+		
+		$this->mysqli_stmt_fo = null;	
+		$this->mysqli_stmt_bool = null;	
+		$this->mysqli_stmt_err = null;	
+		$this->mysqli_stmt_param_count = null;
+		
 		$this->mysqli_bind_types_str = null;
+		$this->mysqli_bind_array = null;
+		$this->mysqli_bind_stmt_str = null;
+		$this->mysqli_bind_bool = null;
+		$this->mysqli_bind_err = null;
+		
+		$this->mysqli_bind_result_array = null;
+		$this->mysqli_bind_result_bool = null;
 		$this->mysqli_bind_result_stmt = null;
+		$this->mysqli_bind_result_err = null;
+		$this->mysqli_bind_result_allow_bool = null;
+		
+		$this->mysqli_exec_result_bool = null;
+		$this->mysqli_exec_result_err = null;
+		$this->mysqli_exec_row_count = null;
+		$this->mysqli_exec_num_rows = null;
+		$this->mysqli_exec_meta_data = null;
+		
+		$this->mysqli_store_result_bool = null;
+		
+		$this->mysqli_bind_result_array = null;
+		$this->mysqli_bind_result_bool = null;
+		$this->mysqli_bind_result_stmt = null;
+		$this->mysqli_bind_result_err = null;
+		$this->mysqli_bind_result_allow_bool = null;
+		
+		$this->mysqli_output = null;
+		$this->mysqli_col = null;
 		$this->mysqli_fetch_bool = null;
 		$this->mysqli_goto_bool = null;
 		$this->mysqli_insert_id = null;
-		$this->mysqli_output = null;
-		$this->mysqli_exec_meta_data = null;
-		$this->mysqli_col = null;
+		$this->mysqli_start_time = null;
+		$this->mysqli_report = null;
+		$this->mysqli_classpath = null;
 
 		return true;
 		}	# End of the destruct function
@@ -647,8 +679,11 @@ function row_pattern($query=null, $i=null, $input=null, $output=null)
 		$mo->auto_init_and_do($query, $i, $input, $output);
 		$mo->fetch();
 
-		if (count($output) == 1 && array_key_exists($output[0], $mo->mysqli_output) )
-			{$value = $mo->mysqli_output[$output[0]];}
+		if (count($output) == 1)
+		{
+			if (array_key_exists($output[0], $mo->mysqli_output) ) {$value = $mo->mysqli_output[$output[0]];}
+			else {$value = null;}
+			}
 		else
 			{$value = $mo->mysqli_output;}
 		unset($mo);
