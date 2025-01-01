@@ -217,7 +217,7 @@ function get_std_sets_for_pg_obj_type($pg_obj_type_id=null, $flatten=true)
 	From pg_obj_type_pg_obj_set_type_brg as p, 
 		types 
 	Where p.pg_obj_type_id = ? and 
-		p.act_bit and 
+		p.act_bit Is true and 
 		p.pg_obj_set_type_id =  types.id";
 
 	return col_pattern($std_set_sql, 'i', array('type'=>$pg_obj_type_id),  array('pg_obj_set_type_ids', 'pg_obj_set_type_names'), $flatten);
@@ -236,7 +236,7 @@ function create_pg_dropdown($flatten=true)
 		pg_objs, 
 		ctx 
 	Where pgs.pg_obj_id = pg_objs.id and 
-		pg_objs.act_bit and 
+		pg_objs.act_bit Is true and 
 		pgs.pg_ctx_id = ctx.id 
 	Order by pg_ctx_id, 
 		obj_name";
@@ -257,7 +257,7 @@ function get_pg_objs($pg_id=null, $filter_objs=false)
 	// We can filter out unassigned objs
 	if ($filter_objs)
 	{
-		$extra = "ppob.act_bit = true and ";
+		$extra = "ppob.act_bit Is true and ";
 		}
 
 	# Get the page objects and their info
@@ -324,7 +324,7 @@ function get_blank_pgs($flatten=true)
 		From pg_objs as po2, 
 			pg_pg_obj_brg as ppob 
 		Where po2.pg_obj_type_id != 14 and 
-			ppob.act_bit and 
+			ppob.act_bit Is true and 
 			po2.id = ppob.pg_obj_id and 
 			ppob.pg_id = pgs.id) 
 	Order By po1.obj_name";
@@ -356,7 +356,7 @@ function get_pg_id_from_pg_pg_obj_brg_id($id=null)
 			pgs
 		Where ppob.id = ? and 
 			ppob.pg_id = pgs.id and 
-			ppob.act_bit 
+			ppob.act_bit Is true 
 		Limit 1";
 		
 	return row_pattern($query, 'i', array($id), array('pg_id') );

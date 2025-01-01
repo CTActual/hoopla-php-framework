@@ -197,14 +197,6 @@ class html_common
 		return $output;
 		}
 
-	public function trim_output($output=null, $tag=null)
-	{
-		if (trim($output) == "<$tag >") 
-			{return "<$tag>";}
-		else
-			{return $output;}
-		}
-
 	public function add_item($type=null, $value=null)
 	{
 		if (!empty($type) && $this->check_not_blank($value) && !is_array($value) && !is_array($type) )
@@ -252,14 +244,15 @@ class generic_obj extends html_common
 	public function path($con=array() )
 	{
 		$this->start($con);
-		$this->output = $this->gen();
+		$this->output = $this->gen(null);
 		return null;
 		}
 
 	public function way($con=array() )
 	{
 		$this->init($con);
-		$this->output = $this->gen(null, false);
+		$this->output = $this->gen(null);
+		return null;
 		}
 		
 	public function start($con=array() )
@@ -267,6 +260,7 @@ class generic_obj extends html_common
 		$con['tag'] = $this->objtag;
 		$this->closing_tag = "</{$this->objtag}>";
 		$this->common($con);
+		return null;
 		}
 
 	public function init($con=array() )
@@ -274,6 +268,7 @@ class generic_obj extends html_common
 		$con['type'] = $this->objtype;
 		$this->closing_tag = null;
 		$this->common($con);
+		return null;
 		}
 
 	public function bow($ins_attrs=null)
@@ -284,15 +279,9 @@ class generic_obj extends html_common
 		return null;
 		}
 
-	public function trim_bow()
-	{
-		$this->opening = $this->trim_output($this->bow . $this->closing_cap, $this->objtag);
-		return null;
-		}
-
 	public function close_bow()
 	{
-		$this->opening = $this->bow . $this->closing_cap;
+		$this->opening = rtrim($this->bow) . $this->closing_cap;
 		return null;
 		}
 
@@ -305,11 +294,12 @@ class generic_obj extends html_common
 		}
 
 	// The first parameter will add any additional attributes to the tag
-	public function gen($ins_attrs=null, $trim=true)
+	// They must be processed through $this->common first, typically, though.
+	public function gen($extra_attrs=null)
 	{
-		$this->bow($ins_attrs);
+		$this->bow($extra_attrs);
 		
-		if ($trim) {$this->trim_bow();} else {$this->close_bow();}
+		$this->close_bow();
 
 		return $this->cobble();
 		}
@@ -557,7 +547,7 @@ class div_obj extends generic_obj
 	function __construct($con=array() )
 	{
 		$this->start($con);
-		$this->output = $this->gen();
+		$this->output = $this->gen(null);
 		return null;
 		}
 
@@ -571,7 +561,7 @@ class div_obj extends generic_obj
 		$this->common($con);
 		$this->closing_tag = "</{$this->objtag}>";
 		
-		if ( ($this->core === Null && !isset($con['close']) ) || ($this->core !== Null && isset($con['noclose']) ) )
+		if ( ($this->core === null && !isset($con['close']) ) || ($this->core !== null && isset($con['noclose']) ) )
 			{$this->closing_tag = null;}
 		
 		return null;
@@ -684,7 +674,7 @@ class fieldset_obj extends div_obj
 			
 		$this->start($con);
 
-		$this->output = $this->gen();
+		$this->output = $this->gen(null);
 		return null;
 		}
 	}	# End of fieldset_obj class
@@ -913,7 +903,7 @@ class hr_obj extends generic_obj
 		$con['tag'] = $this->objtype;
 		$this->closing_tag = null;
 		$this->common($con);
-		$this->output = $this->gen(null, false);
+		$this->output = $this->gen(null);
 		return null;
 		}
 	}	# End of hr_obj class
@@ -989,7 +979,7 @@ class cb_obj extends generic_obj
 		
 		$this->label = (isset($con['label']) ) ? $this->add_simple($this->labelfore . $this->label . $this->labelaft) : null;
 
-		$this->output = $this->gen("$tf", false);
+		$this->output = $this->gen($tf);
 		return null;
 		}
 	}	# End of cb_obj class
@@ -1067,7 +1057,7 @@ class canvas_obj extends generic_obj
 		
 		$this->start($con);
 
-		$this->output = $this->gen(null, false);
+		$this->output = $this->gen(null);
 		return null;
 		}	# End of construct function
 	}	# End of canvas_obj class
@@ -1083,7 +1073,7 @@ class style_obj extends generic_obj
 		$con['type'] = $this->objtype;
 		$this->start($con);
 
-		$this->output = $this->gen(null, false);
+		$this->output = $this->gen(null);
 		return null;
 		}	# End of construct function
 	} # End of style_obj class
@@ -1124,7 +1114,7 @@ class file_obj extends generic_obj
 
 		$accept = (isset($con['accept']) ) ? $this->add_common('accept', $con['accept']) : null;
 
-		$this->output = $this->gen("$accept", false);
+		$this->output = $this->gen($accept);
 		return null;
 		}	# End of construct function
 	}	# End of file_obj class
@@ -1145,7 +1135,7 @@ class button_obj extends generic_obj
 		$this->core = (isset($con['label']) ) ? $con['label'] : $this->core;
 		$this->label = null;
 
-		$this->output = $this->gen(null, false);
+		$this->output = $this->gen(null);
 		return null;
 		}
 	}	# End of button_obj class
@@ -1165,7 +1155,7 @@ class reset_obj extends generic_obj
 		$this->core = (isset($con['label']) ) ? $con['label'] : ( ($this->core !== Null) ? $this->core : "Reset");
 		$this->label = null;
 
-		$this->output = $this->gen(null, false);
+		$this->output = $this->gen(null);
 		return null;
 		}
 	}	# End of reset_obj class
@@ -1209,7 +1199,7 @@ class link_obj extends generic_obj
 		// We need to account for the deprecated use of 'label'
 		if ($this->core === NULL && $this->label !== NULL) {$this->core = $this->label; $this->label = null;}
 
-		$this->output = $this->gen($newpg, false);
+		$this->output = $this->gen($newpg);
 		return null;
 		}	# End of construct function
 	}	# End of link_obj class
@@ -1248,7 +1238,9 @@ class inc_obj extends generic_obj
 
 	function __construct($con=array() )
 	{
-		$this->init($con);
+		$con['tag'] = $this->objtag;
+		
+		$this->common($con);
 
 		$media = (isset($con['media']) ) ? $this->add_common('media', $con['media']) : null;
 		
@@ -1256,7 +1248,7 @@ class inc_obj extends generic_obj
 		if (!isset($con['rel']) || $con['rel'] == 'css') {$con['rel'] == 'stylesheet';}
 		$rel = $this->add_common('rel', $con['rel']);
 
-		$this->output = $this->gen("$rel$media", false);
+		$this->output = $this->gen("$rel$media");
 		return null;
 		}	# End of construct function
 	}	# End of inc_obj class
@@ -1327,7 +1319,7 @@ class source_obj extends generic_obj
 		$media = (isset($con['media']) ) ? $this->add_common('media', $con['media']) : null;
 		$srcset = (isset($con['srcset']) ) ? $this->add_common('srcset', $con['srcset']) : null;
 		
-		$this->output = $this->gen("$media$srcset", false);
+		$this->output = $this->gen("$media$srcset");
 		return null;
 		}	# End of construct function
 	}	# End of img_obj class
@@ -1349,7 +1341,7 @@ class meta_obj extends generic_obj
 		// We'll accept value for content
 		$content = (isset($con['content']) ) ? $this->add_common('content', $con['content']) : ( (isset($con['value']) ) ? $this->add_common('content', $con['value']) : null);
 
-		$this->output = $this->gen("$property$charset{$httpequiv}{$content}", false);
+		$this->output = $this->gen("$property$charset{$httpequiv}{$content}");
 		return null;
 		}	# End of construct function
 	}	# End of meta_obj class
@@ -1380,7 +1372,7 @@ class iframe_obj extends generic_obj
 		$scrolling = (isset($con['scrolling']) ) ? $this->add_common('scrolling', $con['scrolling']) : null;
 		if (!empty($con['fullscreen']) ) {$fullscreen = "webkitAllowFullScreen allowFullScreen";} else {$fullscreen = null;}
 
-		$this->output = $this->gen("{$frameborder}{$scrolling}{$fullscreen}", false);
+		$this->output = $this->gen("{$frameborder}{$scrolling}{$fullscreen}");
 		return null;
 		}	# End of construct function
 	}	# End of iframe_obj class
@@ -1399,7 +1391,7 @@ class audio_obj extends generic_obj
 		$controls = (isset($con['controls']) ) ? 'controls="controls" ' : null;
 		$loop = (isset($con['loop']) ) ? 'loop="loop" ' : null;
 
-		$this->output = $this->gen("{$preload}{$autoplay}$controls{$loop}", false);
+		$this->output = $this->gen("{$preload}{$autoplay}$controls{$loop}");
 		return null;
 		}
 	}	# End of audio_obj class
@@ -1778,7 +1770,7 @@ class option_obj extends array_common
 			if (!isset($obj[$conkey]) )
 				{$this->add_pot($this->add_same($conkey, $this->find_tval($obj['value'], $tval, $dval) ) );}
 				
-			$this->output .= $this->gen();
+			$this->output .= $this->gen(null);
 			$this->pot = null;
 			unset($obj['corefore']);
 			$this->corefore = null;

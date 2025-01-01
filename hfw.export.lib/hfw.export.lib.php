@@ -111,16 +111,16 @@ class hoopla_get_obj_val
 			ppob.pg_obj_loc = ? and 
 			ppob.pg_obj_id = poposvb.pg_obj_id and 
 			If(ppob.use_def_ctx_bit, If(poposvb.ctx_id = ? or poposvb.ctx_id = 1, true, false), If(poposvb.ctx_id = ? and poposvb.ctx_id != 1, true, false) ) and 
-			IF(?, IF(ISNULL(poposvb.pg_id), true, false), IF( (ISNULL(poposvb.pg_id) AND ppob.use_def_bit) OR poposvb.pg_id = ?, true, false) ) and 
+			IF(?, IF(ISNULL(poposvb.pg_id), true, false), IF( (ISNULL(poposvb.pg_id) AND ppob.use_def_bit Is true) OR poposvb.pg_id = ?, true, false) ) and 
 			$extra 
-			poposvb.act_bit and 
-			ppob.act_bit and 
+			poposvb.act_bit Is true and 
+			ppob.act_bit Is true and 
 			types.id = poposvb.pg_obj_set_type_id and 
-			types.act_bit and 
+			types.act_bit Is true and 
 			ctx.id = poposvb.ctx_id and 
-			ctx.act_bit and 
+			ctx.act_bit Is true and 
 			ppob.pg_obj_id = pg_objs.id and 
-			pg_objs.act_bit 
+			pg_objs.act_bit Is true 
 		Order by poposvb.pg_id DESC, 
 			ctx.id, 
 			types.id";
@@ -337,8 +337,8 @@ class hoopla_get_all_pg_vals
 			pg_as_obj.obj_name as pg_name, 
 			pg_as_obj.id, 
 			pg_as_obj.acs_str as pg_acs_str, 
-			(Select spc_ord From pg_pg_obj_brg Where pg_id = set_val.pg_id and pg_obj_id = pg_as_obj.id and act_bit Limit 1) as spc_ord, 
-			(Select pg_obj_loc From pg_pg_obj_brg Where pg_id = set_val.pg_id and pg_obj_id = pg_as_obj.id and act_bit Limit 1) as loc 
+			(Select spc_ord From pg_pg_obj_brg Where pg_id = set_val.pg_id and pg_obj_id = pg_as_obj.id and act_bit Is true Limit 1) as spc_ord, 
+			(Select pg_obj_loc From pg_pg_obj_brg Where pg_id = set_val.pg_id and pg_obj_id = pg_as_obj.id and act_bit Is true Limit 1) as loc 
 		From pg_obj_pg_obj_set_val_brg as set_val, 
 			pg_pg_obj_brg as brg1, 
 			types, 
@@ -351,17 +351,17 @@ class hoopla_get_all_pg_vals
 			set_val.ctx_id = ? and 
 			set_val.pg_id = brg1.pg_id and 
 			$extra 
-			set_val.act_bit and 
-			brg1.act_bit and 
+			set_val.act_bit Is true and 
+			brg1.act_bit Is true and 
 			types.id = set_val.pg_obj_set_type_id and 
-			types.act_bit and 
+			types.act_bit Is true and 
 			ctx.id = set_val.ctx_id and 
-			ctx.act_bit and 
+			ctx.act_bit Is true and 
 			brg1.pg_obj_id = po1.id and 
-			po1.act_bit and 
+			po1.act_bit Is true and 
 			pgs.id = brg1.pg_id and 
 			pg_as_obj.id = pgs.pg_obj_id and 
-			pg_as_obj.act_bit 			
+			pg_as_obj.act_bit Is true 
 		Order by set_val.pg_obj_set_type_id, 
 			spc_ord, 
 			pg_as_obj.obj_name";
@@ -529,11 +529,11 @@ class hoopla_get_ctx_vals
 		
 		// We make use of the use_def_bit to fine-tune the results worry-free
 		if (!empty($val_pg_list) && $get_def_bit)
-			{$val_pg_extra = "(p.pg_id IN (" . implode(', ', $val_pg_list) . ") or (p.pg_id Is NULL and ppob.use_def_bit) ) and ";}
+			{$val_pg_extra = "(p.pg_id IN (" . implode(', ', $val_pg_list) . ") or (p.pg_id Is NULL and ppob.use_def_bit Is true) ) and ";}
 		elseif (!empty($val_pg_list) && !$get_def_bit)
 			{$val_pg_extra = "p.pg_id IN (" . implode(', ', $val_pg_list) . ") and ";}
 		elseif (empty($val_pg_list) && $get_def_bit)
-			{$val_pg_extra = "p.pg_id Is NULL and ppob.use_def_bit and ";}
+			{$val_pg_extra = "p.pg_id Is NULL and ppob.use_def_bit Is true and ";}
 			
 		// We can zero in on particular locations
 		// These are always strings
@@ -567,18 +567,18 @@ class hoopla_get_ctx_vals
 			pg_objs as po, 
 			types as obj_type, 
 			ctx 
-		Where p.act_bit and 
+		Where p.act_bit Is true and 
 			$ctx_row 
 			p.pg_obj_set_val Is Not NULL and 
 			set_type.id = p.pg_obj_set_type_id and 
 			p.pg_obj_id = ppob.pg_obj_id and 
 			p.ctx_id = ctx.id and 
-			ppob.act_bit and 
+			ppob.act_bit Is true and 
 			po.id = p.pg_obj_id and 
-			po.act_bit and 
-			set_type.act_bit and 
-			obj_type.act_bit and 
-			ctx.act_bit and 
+			po.act_bit Is true and 
+			set_type.act_bit Is true and 
+			obj_type.act_bit Is true and 
+			ctx.act_bit Is true and 
 			$obj_type_extra 
 			$set_type_extra 
 			$asc_pg_extra 
@@ -892,7 +892,7 @@ function hfw_get_all_locs($url_tag=null, $named_pg_ctx=null, $named_obj_type=nul
 	// Deal with activity
 	if ($act_obj == true)
 	{
-		$act_extra = "ppob.act_bit and pg_objs.act_bit and ";
+		$act_extra = "ppob.act_bit Is true and pg_objs.act_bit Is true and ";
 		}
 		
 	$query = "Select DISTINCT pg_obj_loc, 

@@ -91,9 +91,9 @@ function get_vals_by_pg_and_obj($pg_id=null, $pg_obj_id=null)
 		p.pg_obj_set_type_id = t1.id and 
 		p.ctx_id = c.id and 
 		c.ctx_type_id = t2.id and 
-		t1.act_bit and 
-		t2.act_bit and 
-		c.act_bit 
+		t1.act_bit Is true and 
+		t2.act_bit Is true and 
+		c.act_bit Is true 
 	Order By c.spc_ord, 
 		t1.spc_ord";
 
@@ -131,9 +131,9 @@ function get_pg_val_set_type_ids($pg_id=null, $pg_obj_id=null)
 		p.pg_obj_set_val != '' and 
 		p.ctx_id = c.id and 
 		c.ctx_type_id = t2.id and 
-		t1.act_bit and 
-		t2.act_bit and 
-		c.act_bit";
+		t1.act_bit Is true and 
+		t2.act_bit Is true and 
+		c.act_bit Is true";
 
 	$output = array('val_pg_obj_set_type_id');
 
@@ -317,9 +317,9 @@ function chk_for_def_vals($pg_obj_id=null)
 		p.pg_obj_set_val Is Not NULL and 
 		p.ctx_id = c.id and 
 		p.pg_obj_set_type_id = t.id and 
-		p.act_bit and 
-		c.act_bit and 
-		t.act_bit 
+		p.act_bit Is true and 
+		c.act_bit Is true and 
+		t.act_bit Is true 
 	Order By c.spc_ord, 
 		c.ctx_lbl";
 

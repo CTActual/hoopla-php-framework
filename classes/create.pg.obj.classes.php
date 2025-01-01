@@ -87,10 +87,10 @@ function get_full_pg_obj_list($flatten=true)
 		CONCAT_WS('', obj_name, ' (', pg_objs.id, '), ', type_name, ' (', std_type_lbl, ') &mdash; ', obj_dsr) as list 
 	From pg_objs, 
 		types 
-	Where pg_objs.act_bit and 
+	Where pg_objs.act_bit Is true and 
 		pg_objs.pg_obj_type_id = types.id and 
-		types.act_bit and 
-		pg_objs.id In (Select pg_obj_id From pg_pg_obj_brg Where act_bit) 
+		types.act_bit Is true and 
+		pg_objs.id In (Select pg_obj_id From pg_pg_obj_brg Where act_bit Is true) 
 	Order By types.spc_ord, 
 		pg_objs.obj_name";
 
@@ -284,7 +284,7 @@ function set_pg_pg_obj_brg_act_bit_false($pg_id=null, $exclude_pgs=true)
 	$update_sql = "Update pg_pg_obj_brg 
 	Set act_bit = false 
 	Where pg_id = ? and 
-		act_bit = true $extra";
+		act_bit Is true $extra";
 
 	return ins_pattern($update_sql, 'i', array('id'=>$pg_id) );
 	}
@@ -333,7 +333,7 @@ function set_pg_pg_obj_brg_use_def_bit_false($pg_id=null, $exclude_pgs=true)
 	$update_sql = "Update pg_pg_obj_brg 
 	Set use_def_bit = false 
 	Where pg_id = ? and 
-		use_def_bit = true $extra";
+		use_def_bit Is true $extra";
 
 	return ins_pattern($update_sql, 'i', array('id'=>$pg_id) );
 	}
@@ -366,7 +366,7 @@ function set_pg_pg_obj_brg_use_def_ctx_bit_false($pg_id=null, $exclude_pgs=true)
 	$update_sql = "Update pg_pg_obj_brg 
 	Set use_def_ctx_bit = false 
 	Where pg_id = ? and 
-		use_def_ctx_bit = true $extra";
+		use_def_ctx_bit Is true $extra";
 
 	return ins_pattern($update_sql, 'i', array('id'=>$pg_id) );
 	}
@@ -424,7 +424,7 @@ function get_pg_obj_set_types($pg_obj_type_id=null)
 	$brg_sql = "Select pg_obj_set_type_id 
 	From pg_obj_type_pg_obj_set_type_brg 
 	Where pg_obj_type_id = ? and 
-		act_bit";
+		act_bit Is true";
 
 	return col_pattern($brg_sql, 'i', array('id'=>$pg_obj_type_id), array('pg_obj_set_type_id') );
 	}
@@ -461,9 +461,9 @@ function list_pg_obj_set_types($pg_obj_type_id=null, $flatten=true)
 	From pg_obj_type_pg_obj_set_type_brg as potb, 
 		types 
 	Where pg_obj_type_id = ? and 
-		potb.act_bit and 
+		potb.act_bit Is true and 
 		types.id = potb.pg_obj_set_type_id and 
-		types.act_bit 
+		types.act_bit Is true 
 	Order By types.spc_ord, 
 		types.type_name";
 
@@ -494,7 +494,7 @@ function get_obj_pg_list($obj_id=null)
 		pgs.id = ppob.pg_id and 
 		pgs.pg_obj_id = po.id and 
 		po.pg_obj_type_id = 14 and 		
-		ppob.act_bit 
+		ppob.act_bit Is true 
 	Order By po.obj_name";
 
 	$output = array('pg_id', 'pg_obj_id', 'pg_name', 'pg_dsr', 'pg_acs_str', 'pg_act_bit', 'obj_loc', 
@@ -525,7 +525,7 @@ function clone_pg_objs($src_pg_id=null, $dst_pg_id=null)
 		true 
 	From pg_pg_obj_brg 
 	Where pg_id = ? and 
-		act_bit and 
+		act_bit Is true and 
 		pg_obj_id Not In (Select pg_obj_id From pgs Where id = ?) and 
 		pg_id In (Select id From pgs Where id = ?)";
 
