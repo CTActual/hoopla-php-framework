@@ -15,10 +15,7 @@ The following steps serve as an outline (details to follow):
 # System Requirements #
 * * *
 
-Any local server that can handle PHP 5.6+ and MySQL 5.3+ should be able to install the IDE and database.
-PHP versions 7+ recommended, and MySQL 8.0+ recommended.
-Modern browsers recommended for the IDE.
-Please read the detail installation instructions for caveats.
+Any local server that can handle PHP 5.6+ and MySQL 5.3+ should be able to install the IDE and database. PHP versions 7+ recommended, and MySQL 8.0+ recommended. Testing for PHP 8+ has been somewhat limited, and bugs have been recently fixed with more to follow when found. Modern browsers recommended for the IDE. Please read the detail installation instructions for caveats.
 Future updates might require a change in the hosting environment.
 
 
@@ -123,3 +120,7 @@ the work of designing the website does not have to be on the same machine as the
 9. New for 2024
 
 	We have added a field to the HFW database table "pg_pg_obj_brg" called "use_def_ctx_bit".  There is a file in the "install.scripts" folder, "update.hfw.db.for.2024.sql" that should be run on older databases only to update them to the latest structure.  This new field and changes in the export library framework classes might result in changes in the behavior of previously created projects and they will need to be tested before any production changes are applied.  The same script also adds a new table to the database needed for new multi-project feature to run correctly.  So, running "update.hfw.db.for.2024.sql" in PHPMyAdmin or on the MySQL command line will make both updates.  The new 2024 version will not require this script to be run.
+	
+10. New for 2025
+
+	We have fixed bugs that were affecting installs in PHP 8+ environments and will do more testing in that arena, so keep checking for updates.  There might be forthcoming features added to the export library.  However, the code here is largely working as intended.  The GUI has resisted needing any user controlled settings, but as testing continues this might change.  The need for a search feature is being evaluated.

@@ -1,4 +1,4 @@
-Check out our updated version for 2024!
+Check out our updated version for 2024 and the latest updates for 2025!
 
 Now easily supporting mulitple projects!
 

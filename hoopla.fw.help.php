@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2025 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -189,6 +189,13 @@ require_once($incpath . 'common.incs.php');
 				<li>As per above again, the export library calls for retrieving values and context values now reflect the use of <b>use_def_ctx_bit</b> and have been revamped.  Behavior might be slightly different from before and things could break, requiring passing extra parameters to these calls or changing the default settings on an object.  For example, <b>hfw_return_value, hfwn_return_value, hfw_get_ctx_vals </b>and <b>hfwn_get_ctx_vals</b> all have <b>$get_def_bit</b> as an input param and would be affected by this change.</li>
 				<li>Further: some of these calls now output the <b>use_def_ctx_bit</b> value.</li>
 				<li> Now users can change the ordering of pages on <b>Pages</b> UI page, instead of going through <b>Values-by-Object</b> as before.</li>
+			</ol>
+			<li><b>Changes for 2025:</b></li>
+			<ol>
+				<li>Some bugs affecting PHP 8+ installs have been eliminated.</li>
+				<li>Assigning and object to existing pages and auto-creating a special order is now more consistent with typical user expectations, and works better with the object type dropdown count.</li>
+				<li>The export library help shows better that some input parameters can now be arrays.</li>
+				<li>The <b>hfw_get_pg_list</b> function now can filter out inactive pages and can output based on columns as well as rows to make grabbing a list of properties into an array easier.  This now chains nicely with <b>hfw_get_ctx_vals</b> and <b>hfwn_get_ctx_vals</b>.</li>
 			</ol>
 		</ul>
 		

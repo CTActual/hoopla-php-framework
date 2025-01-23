@@ -1,7 +1,7 @@
 <?php
 
 /*
-Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2025 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -407,8 +407,13 @@ function append_obj_spc_ord($pg_id=null, $pg_obj_id=null)
 {
 	if (!check_index($pg_id) || !check_index($pg_obj_id) ) {return null;}
 
-	# Append to spc_ord field
-	$query = "Select IfNull(max(spc_ord) + 1, 1) From pg_pg_obj_brg Where pg_id = ? Limit 1";
+	# Append to spc_ord field.
+	# Ignore the special ordering of pages themselves here.
+	$query = "Select IfNull(max(spc_ord) + 1, 1) 
+					From pg_pg_obj_brg 
+					Where pg_id = ? and 
+						pg_obj_id Not In (Select pg_obj_id From pgs) 
+					Limit 1";
 
 	$max_spc_ord = row_pattern($query, 'i', array('pg_id'=>$pg_id), array('mso') );
 

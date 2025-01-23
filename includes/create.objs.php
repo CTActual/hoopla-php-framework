@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2025 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -29,18 +29,63 @@ or implied, of Cargotrader, Inc.
 
 	// Create page objects
 
+// We need to deal with adding new objects first so the count is correct when the dropdown loads.
+	if (isset($_POST['repage']) )
+	{
+		$obj_type_id = (isset($_POST['obj_type_id']) && check_index($_POST['obj_type_id']) ) ? (int) trim($_POST['obj_type_id']) : null;
+		$obj_type_det = (check_index($obj_type_id) ) ? get_type($obj_type_id) : null;
+
+		if (isset($_POST['addnew']) )
+		{
+			$new_obj = create_pg_obj($obj_type_id, $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
+
+			// Deal with adding new objects to existing pages
+			if (isset($_POST['assign']) && $_POST['assign'] == 'true')
+			{
+				$pg_list = get_pg_list($_POST['pg_ctx_id']);
+
+				foreach ($pg_list as $pg_list_key=>$pg)
+				{
+					update_pg_brg($pg['pg_id'], $new_obj, $_POST['location']);
+
+					// Deal with adding the object to the end of the object list for each page
+					if (isset($_POST['order']) && $_POST['order'] == 'true')
+					{
+						append_obj_spc_ord($pg['pg_id'], $new_obj);
+						}
+					}
+				}
+			}
+		elseif (isset($_POST['updateobj']) )
+		{
+			$update_obj = update_pg_obj($_POST['sel_update_obj_id'], $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
+			unset($_POST['updateobj'], $_POST['sel_update_obj_id'], $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
+			}
+		elseif (isset($_POST['activebit']) )
+		{
+			foreach($_POST['obj_hid'] as $pg_obj_id)
+			{
+				if (isset($_POST['obj_act'][$pg_obj_id]) && $_POST['obj_act'][$pg_obj_id] = $pg_obj_id)
+					{$tf = true;} else {$tf = false;}
+				$pg_tf = set_pg_obj_tf($pg_obj_id, $tf);
+				}
+			} 	
+		}	# end of repage conditional
+		
+//" _________________________________________________________________________________________
 	echo $goo('form');	#--1--
 
 	$pg_obj_type_list = pg_obj_type_list();
 
 	echo "<fieldset><legend>Page Object Types [shorthand] (Type ID)</legend>";
 
-	// Show all object types
+	//" Show all object types
 	$post_obj_type_id = (isset($_POST['obj_type_id']) && check_index($_POST['obj_type_id']) ) ? $_POST['obj_type_id'] : null;
 	echo $aoo('select', "class=sel_css;\nname=obj_type_id;\ncore={$aoo('option', "value={$pg_obj_type_list['type_id']};\ntval={$post_obj_type_id};\ncore={$pg_obj_type_list['type_lbl']};\ncoreaft=&nbsp;")};\nonchange=clickB()");
 
 	echo $aoo('button', "class=button_passive;\nname=seltype;\nvalue=1;\nlabel=Select Object Type;\nid=seltype");
 
+	//"
 	echo "</fieldset><br>\n";
 
 	echo $aoo('hidden', "name=page;\nvalue=true");
@@ -76,42 +121,6 @@ or implied, of Cargotrader, Inc.
 		$sel_obj_dsr = "";
 		$sel_acs_str = "";
 
-		if (isset($_POST['repage']) && isset($_POST['addnew']) )
-		{
-			$new_obj = create_pg_obj($obj_type_id, $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
-
-			// Deal with adding new objects to existing pages
-			if (isset($_POST['assign']) && $_POST['assign'] == 'true')
-			{
-				$pg_list = get_pg_list($_POST['pg_ctx_id']);
-
-				foreach ($pg_list as $pg_list_key=>$pg)
-				{
-					update_pg_brg($pg['pg_id'], $new_obj, $_POST['location']);
-
-					// Deal with adding the object to the end of the object list for each page
-					if (isset($_POST['order']) && $_POST['order'] == 'true')
-					{
-						append_obj_spc_ord($pg['pg_id'], $new_obj);
-						}
-					}
-				}
-			}
-		elseif (isset($_POST['repage']) && isset($_POST['updateobj']) )
-		{
-			$update_obj = update_pg_obj($_POST['sel_update_obj_id'], $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
-			unset($_POST['updateobj'], $_POST['sel_update_obj_id'], $_POST['obj_name'], $_POST['obj_dsr'], $_POST['acs_str']);
-			}
-		elseif (isset($_POST['repage']) && isset($_POST['activebit']) )
-		{
-			foreach($_POST['obj_hid'] as $pg_obj_id)
-			{
-				if (isset($_POST['obj_act'][$pg_obj_id]) && $_POST['obj_act'][$pg_obj_id] = $pg_obj_id)
-					{$tf = true;} else {$tf = false;}
-				$pg_tf = set_pg_obj_tf($pg_obj_id, $tf);
-				}
-			} 	# end of repage conditional
-		
 		// We need the latest values
 		if (isset($_POST['repage']) && isset($sel_obj_id) )
 		{

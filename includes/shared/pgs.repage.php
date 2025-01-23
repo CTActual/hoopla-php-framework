@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2025 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -36,15 +36,15 @@ or implied, of Cargotrader, Inc.
 
 			// Now we see if anything came of the entry process
 			// Go thru each object to see if they were selected (only active objects get an update)
-			if (isset($_POST['act_obj']) ) 
+			if (isset($_POST['act_obj']) && is_array($_POST['act_obj']) ) 
 			{
-				while (list($val_id, $id_val) = each($_POST['act_obj']) )
+				foreach($_POST['act_obj'] as $val_id=>$id_val)
 				{
 					$insert_result = set_pg_pg_obj_brg_act_bit_true($pg_id, $id_val);
 					}	# End of while
 				}	# End of act_bit updates
 
-			if (isset($_POST['use_def_obj']) ) 
+			if (isset($_POST['use_def_obj']) && is_array($_POST['use_def_obj']) ) 
 			{
 				foreach($_POST['use_def_obj'] as $use_def_key=>$id_val)
 				{
@@ -52,7 +52,7 @@ or implied, of Cargotrader, Inc.
 					}	# End of foreach
 				}	# End of use_def_bit updates
 
-			if (isset($_POST['use_def_ctx_obj']) ) 
+			if (isset($_POST['use_def_ctx_obj']) && is_array($_POST['use_def_ctx_obj']) ) 
 			{
 				foreach($_POST['use_def_ctx_obj'] as $use_def_key=>$id_val)
 				{
@@ -62,13 +62,16 @@ or implied, of Cargotrader, Inc.
 
 			$non_pg_obj_list = get_non_pg_obj_ids();
 
-			foreach($non_pg_obj_list['non_pg_obj_ids'] as $non_pg_key=>$all_pg_obj_id)
+			if (isset($non_pg_obj_list['non_pg_obj_ids']) && is_array($non_pg_obj_list['non_pg_obj_ids']) )
 			{
-				$obj_loc = (isset($_POST['obj_loc_' . $all_pg_obj_id]) && !empty($_POST['obj_loc_' . $all_pg_obj_id]) ) ? trim($_POST['obj_loc_' . $all_pg_obj_id]) : null;
-				$spc_ord = (isset($_POST['obj_spc_ord_' . $all_pg_obj_id]) && !empty($_POST['obj_spc_ord_' . $all_pg_obj_id]) ) ? trim($_POST['obj_spc_ord_' . $all_pg_obj_id]) : null;
-				$updated_loc = update_obj_loc($pg_id, $all_pg_obj_id, $obj_loc);
-				$updated_spc_ord = update_obj_spc_ord($pg_id, $all_pg_obj_id, $spc_ord);
-				}	# End of foreach
+				foreach($non_pg_obj_list['non_pg_obj_ids'] as $non_pg_key=>$all_pg_obj_id)
+				{
+					$obj_loc = (isset($_POST['obj_loc_' . $all_pg_obj_id]) && !empty($_POST['obj_loc_' . $all_pg_obj_id]) ) ? trim($_POST['obj_loc_' . $all_pg_obj_id]) : null;
+					$spc_ord = (isset($_POST['obj_spc_ord_' . $all_pg_obj_id]) && !empty($_POST['obj_spc_ord_' . $all_pg_obj_id]) ) ? trim($_POST['obj_spc_ord_' . $all_pg_obj_id]) : null;
+					$updated_loc = update_obj_loc($pg_id, $all_pg_obj_id, $obj_loc);
+					$updated_spc_ord = update_obj_spc_ord($pg_id, $all_pg_obj_id, $spc_ord);
+					}	# End of foreach
+				}
 			} # end of repage conditional
 		else
 		{

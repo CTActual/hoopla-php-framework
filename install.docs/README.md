@@ -48,7 +48,7 @@ The IDE comes with extensive help pages on how to use the framework.  There shou
 # License #
 ***
 
-Copyright 2009-2024 Cargotrader, Inc. All rights reserved.
+Copyright 2009-2025 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:

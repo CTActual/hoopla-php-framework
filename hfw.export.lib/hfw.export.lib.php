@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright 2011-2024 Cargotrader, Inc. All rights reserved.
+Copyright 2011-2025 Cargotrader, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -509,7 +509,7 @@ class hoopla_get_ctx_vals
 		// One can filter to see if the values are associated with a specific page
 		$val_pg_list = $this->compare_inputs($named_val_pg, $val_pg, 'get_hfw_pgnum_from_url_tag', null);
 		
-		// 	$ctx_list depends on the $get_def_bit setting, but a ctx must alwasy be available, so the query returns nothing thru false
+		// 	$ctx_list depends on the $get_def_bit setting, but a ctx must always be available, so the query returns nothing thru false
 		$id_list = implode(', ', $ctx_list);
 		
 		if ($get_def_bit && !empty($ctx_list) )
@@ -743,8 +743,16 @@ function hfwn_get_ctx_vals($named_ctx=null, $named_obj_type=null, $named_set_typ
 */
 
 //_____________________________________________________________________________________________________
-function hfw_get_pg_list($pg_ctx=null)
+function hfw_get_pg_list($pg_ctx=null, $act_only=false, $col_priority=false)
 {
+	// Input defaults
+	$str = '';
+	$input = array();
+	$func = 'hfw_tcol_pattern';
+	
+	$act_only = hfw_force_boolean($act_only, false);
+ 	$col_priority = hfw_force_boolean($col_priority, false);
+
 	// Filter by page context
 	if (!empty($pg_ctx) )
 	{
@@ -752,24 +760,34 @@ function hfw_get_pg_list($pg_ctx=null)
 		$input = array('pg_ctx'=>hfw_mb_prepstr($pg_ctx) );
 		$extra = "and ctx.ctx_lbl = ? ";
 		}
+		
+	// Filter out inactive pages
+	if ($act_only)
+		{$extra .= "and pg_objs.act_bit = true and ppob.act_bit = true ";}
 
-	$obj_sql = "Select pg_objs.id, 
+	// Prioritize output by column headers instead of the default rows
+	if ($col_priority)
+		{$func = 'hfw_col_pattern';}
+
+	$obj_sql = "Select pg_objs.id as obj_id, 
 		obj_name, 
 		obj_dsr, 
 		ppob.pg_obj_loc, 
 		acs_str, 
-		pgs.id, 
+		pgs.id as pg_id, 
 		pgs.pg_ctx_id, 
 		ctx.ctx_name, 
 		ctx.ctx_lbl, 
-		pg_objs.act_bit 
+		pg_objs.act_bit, 
+		ppob.act_bit as obj_act_bit 
 	From pg_objs, 
 		ctx, 
 		pgs 
 		Left Join 
 			(Select pg_obj_loc, 
 				pg_id, 
-				spc_ord 
+				spc_ord, 
+				ppob.act_bit 
 			From pg_pg_obj_brg as ppob, 
 				pgs, 
 				pg_objs 
@@ -784,17 +802,18 @@ function hfw_get_pg_list($pg_ctx=null)
 		pg_objs.id";
 
 	$result_array_1 = array(	'obj_id', 
-									'obj_name', 
-									'obj_dsr', 
-									'url_tag', 
-									'acs_str', 
-									'pg_id', 
-									'pg_ctx_id', 
-									'pg_ctx_name', 
-									'pg_ctx_lbl', 
-									'act_bit');
+										'obj_name', 
+										'obj_dsr', 
+										'url_tag', 
+										'acs_str', 
+										'pg_id', 
+										'pg_ctx_id', 
+										'pg_ctx_name', 
+										'pg_ctx_lbl', 
+										'act_bit', 
+										'obj_act_bit');
 
-	return hfw_tcol_pattern($obj_sql, $str, $input, $result_array_1);
+	return $func($obj_sql, $str, $input, $result_array_1);
 	}
 /*
 	hfw_get_pg_list HELP
@@ -806,10 +825,12 @@ function hfw_get_pg_list($pg_ctx=null)
 
 	This function is a duplicate of the IDE class get_pg_list, except it uses the label instead of the page context id, and the ordering is by special order.
 
-	INPUT: ($pg_ctx=null)
-		$pg_ctx		not required (the string label of the page context id, which may or may not be easy to use, the default page context is set as def_pg_ctx)
+	INPUT: ($pg_ctx=null, $act_only=false, $col_priority=false)
+		$pg_ctx			not required (the string label of the page context id, which may or may not be easy to use, the default page context is set as def_pg_ctx)
+		$act_only		not required, default = false (will filter out any inactive pages, either as pgs.act_bit or pg_pg_obj_brg.act_bit)
+		$col_priority	not required, default = false (will prioritze output by column headers instead of rows if true)
 
-	OUTPUT: The output array is array[0 ... N][	'obj_id'=>the page object id, 
+	OUTPUT: The output array is array[0 ... N]↔[	'obj_id'=>the page object id, 
 		'obj_name'=>the page object name (page name), 
 		'obj_dsr'=>the page object description (page description), 
 		'url_tag'=>the page object location (the page url tag id), 
@@ -818,7 +839,8 @@ function hfw_get_pg_list($pg_ctx=null)
 		'pg_ctx_id'=>the page context id--no relation to object value contexts, 
 		'pg_ctx_name'=>the page context name, 
 		'pg_ctx_lbl'=>the page context label, 
-		'act_bit'=>the page state]
+		'act_bit'=>the page state, 
+		'obj_act_bit=>the page as object state]
 
 	This function is primarily useful for vetting page calls to templates, since the context can match a template.
 */
